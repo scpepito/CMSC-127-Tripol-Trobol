@@ -1,4 +1,5 @@
 export { default as AppShell } from './layout/AppShell.jsx'
+export { default as AppFrame } from './layout/AppFrame.jsx'
 export { default as Sidebar } from './layout/Sidebar.jsx'
 export { default as TopBar } from './layout/TopBar.jsx'
 export { default as PageHeader } from './layout/PageHeader.jsx'
@@ -18,4 +19,4 @@ export { default as StatusPill } from './data/StatusPill.jsx'
 
 export { default as HeroSummaryCard } from './display/HeroSummaryCard.jsx'
 export { default as DriverDetailsHero } from './display/DriverDetailsHero.jsx'
-
+export { default as VehicleDetailsHero } from './display/VehicleDetailsHero.jsx'

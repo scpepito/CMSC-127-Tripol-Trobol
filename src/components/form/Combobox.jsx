@@ -23,7 +23,7 @@ export default function Combobox({
   const selectedLabel = useMemo(() => {
     if (!value) return ''
     const hit = options?.find((o) => o.value === value)
-    return hit?.label ?? String(value)
+    return hit?.selectedLabel ?? hit?.label ?? String(value)
   }, [options, value])
 
   const filtered = useMemo(() => {
@@ -121,7 +121,14 @@ export default function Combobox({
                     <span className="grid size-5 shrink-0 place-items-center">
                       {active ? <Check className="size-4 text-[#8981d2]" /> : null}
                     </span>
-                    <span className="min-w-0 flex-1 truncate">{opt.label}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate">{opt.label}</span>
+                      {opt.description ? (
+                        <span className="mt-0.5 block truncate text-xs text-slate-500">
+                          {opt.description}
+                        </span>
+                      ) : null}
+                    </span>
                   </button>
                 )
               })

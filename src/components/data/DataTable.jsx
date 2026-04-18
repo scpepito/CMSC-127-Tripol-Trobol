@@ -6,6 +6,7 @@ export default function DataTable({
   getRowKey,
   className,
   rowClassName,
+  theadClassName,
 }) {
   const keyForRow = getRowKey ?? ((_, index) => index)
 
@@ -17,7 +18,7 @@ export default function DataTable({
       )}
     > 
       <table className="w-full table-fixed">
-        <thead className="bg-[#f4f6fe]">
+        <thead className={cn('bg-[#f4f6fe]', theadClassName)}>
           <tr className="border-b border-slate-200">
             {columns.map((col) => (
               <th

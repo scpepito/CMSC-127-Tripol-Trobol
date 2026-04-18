@@ -39,7 +39,7 @@ export default function DriverDetailsHero({
     <section
       className={cn(
         'relative overflow-hidden rounded-2xl bg-linear-to-bl from-[#8981d2] to-[#6B63B5] px-10 py-8 text-white',
-        'shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.35)] ring-1 ring-white/10',
+        'shadow-[0px_25px_50px_-12px_rgba(0,0,0,0.35)] ring-1 ring-[#6B63B5] border-3 border-[#8981d2]',
         'transition-all hover:shadow-xl hover:scale-[1.02]', 
         className,
         
