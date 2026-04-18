@@ -87,10 +87,7 @@ function validateVehiclePayload(res, payload, { requirePlateNumber }) {
     return badRequest(res, 'owner_license_number must be 11 alphanumeric characters (dashes optional)')
   }
 
-  const vehicleTypes = new Set(['Private Car', 'Motorcycle', 'Public Utility Vehicle'])
-  if (!vehicleTypes.has(payload.vehicle_type)) {
-    return badRequest(res, "vehicle_type must be 'Private Car', 'Motorcycle', or 'Public Utility Vehicle'")
-  }
+  if (!isNonEmptyString(payload.vehicle_type)) return badRequest(res, 'vehicle_type is required')
 
   if (!isNonEmptyString(payload.make)) return badRequest(res, 'make is required')
   if (!isNonEmptyString(payload.model)) return badRequest(res, 'model is required')
@@ -202,6 +199,9 @@ export async function createVehicle(req, res) {
     )
   } catch (e) {
     if (String(e?.code) === 'ER_DUP_ENTRY') {
+      const msg = String(e?.sqlMessage ?? '').toLowerCase()
+      if (msg.includes('uk_engine')) return res.status(409).json({ error: 'engine_number already exists' })
+      if (msg.includes('uk_chassis')) return res.status(409).json({ error: 'chassis_number already exists' })
       return res.status(409).json({ error: 'Vehicle already exists' })
     }
     if (String(e?.code) === 'ER_NO_REFERENCED_ROW_2') {
@@ -253,6 +253,9 @@ export async function updateVehicle(req, res) {
       )
     } catch (e) {
       if (String(e?.code) === 'ER_DUP_ENTRY') {
+        const msg = String(e?.sqlMessage ?? '').toLowerCase()
+        if (msg.includes('uk_engine')) return res.status(409).json({ error: 'engine_number already exists' })
+        if (msg.includes('uk_chassis')) return res.status(409).json({ error: 'chassis_number already exists' })
         return res.status(409).json({ error: 'plate_number already exists' })
       }
       if (String(e?.code) === 'ER_NO_REFERENCED_ROW_2') {

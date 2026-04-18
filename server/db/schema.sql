@@ -2,9 +2,13 @@ CREATE DATABASE IF NOT EXISTS tripol_trobol;
 USE tripol_trobol;
 
 DROP TABLE IF EXISTS vehicle_violations;
+
 DROP TABLE IF EXISTS vehicle_registrations;
+
 DROP TABLE IF EXISTS vehicles;
+
 DROP TABLE IF EXISTS driver_addresses;
+
 DROP TABLE IF EXISTS drivers;
 
 CREATE TABLE drivers (
@@ -33,6 +37,7 @@ CREATE TABLE driver_addresses (
   province VARCHAR(80) NOT NULL,
   postal_code VARCHAR(20) NULL,
   PRIMARY KEY (license_number),
+ 
   CONSTRAINT fk_driver_addresses_drivers
     FOREIGN KEY (license_number)
     REFERENCES drivers(license_number)
@@ -45,7 +50,7 @@ CREATE TABLE vehicles (
   engine_number VARCHAR(15) NOT NULL,
   chassis_number VARCHAR(17) NOT NULL,
   owner_license_number VARCHAR(11) NOT NULL,
-  vehicle_type ENUM('Private Car','Motorcycle','Public Utility Vehicle') NOT NULL,
+  vehicle_type VARCHAR(80) NOT NULL,
   make VARCHAR(30) NOT NULL,
   model VARCHAR(50) NOT NULL,
   year SMALLINT NOT NULL,
@@ -53,6 +58,10 @@ CREATE TABLE vehicles (
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (plate_number),
+
+  CONSTRAINT uk_engine UNIQUE (engine_number),
+  CONSTRAINT uk_chassis UNIQUE (chassis_number),
+
   CONSTRAINT fk_vehicles_drivers
     FOREIGN KEY (owner_license_number)
     REFERENCES drivers(license_number)

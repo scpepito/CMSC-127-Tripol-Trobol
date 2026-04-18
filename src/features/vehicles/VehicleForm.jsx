@@ -133,13 +133,19 @@ export default function VehicleForm({
       <SectionCard title="Vehicle Details" accent="pink">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField label="Vehicle Type" required>
-            <Combobox
+            <TextInput
+              list="vehicle_type_suggestions"
               value={vehicleType}
-              onChange={(v) => setVehicleType(v)}
-              options={vehicleTypeOptions}
-              placeholder="Select..."
-              searchable={false}
+              onChange={(e) => setVehicleType(e.target.value)}
+              placeholder="e.g. Private Car"
+              maxLength={80}
+              autoComplete="off"
             />
+            <datalist id="vehicle_type_suggestions">
+              {vehicleTypeOptions.map((o) => (
+                <option key={o.value} value={o.value} />
+              ))}
+            </datalist>
           </FormField>
 
           <FormField label="Make" required>
