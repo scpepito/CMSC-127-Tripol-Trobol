@@ -2,22 +2,17 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   ArrowDownUp,
   ArrowLeft,
-  BadgeCheck,
-  Car,
   ClipboardList,
   Eye,
   Filter,
-  FileBarChart2,
   IdCard,
-  LayoutDashboard,
   Pencil,
   Plus,
   Trash2,
-  TriangleAlert,
   Users,
 } from 'lucide-react'
 import {
-  AppShell,
+  AppFrame,
   Button,
   Combobox,
   DataTable,
@@ -27,9 +22,7 @@ import {
   PageHeader,
   SearchInput,
   SectionCard,
-  Sidebar,
   StatusPill,
-  TopBar,
 } from '../../components/index.js'
 import { createDriver, deleteDriver, getDriver, listDrivers, updateDriver } from '../../api/drivers.js'
 import DriverForm from './DriverForm.jsx'
@@ -56,7 +49,7 @@ const sortOptions = [
   { value: 'name_desc', label: 'Name (Z-A)' },
 ]
 
-export default function DriversPage() {
+export default function DriversPage({ onNavigate, openLicenseNumber, returnTo }) {
   const [view, setView] = useState('list') // list | create | edit | details
   const [selectedLicenseNumber, setSelectedLicenseNumber] = useState(null)
 
@@ -71,6 +64,21 @@ export default function DriversPage() {
 
   const [drivers, setDrivers] = useState([])
   const [selectedDriver, setSelectedDriver] = useState(null)
+
+  const openDetails = useCallback(async (licenseNumber) => {
+    setError('')
+    setLoading(true)
+    try {
+      const driver = await getDriver(licenseNumber)
+      setSelectedDriver(driver)
+      setSelectedLicenseNumber(licenseNumber)
+      setView('details')
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   const applySort = useCallback((rows) => {
     const sorted = [...rows].sort((a, b) =>
@@ -102,20 +110,12 @@ export default function DriversPage() {
     }
   }, [search, status, licenseType, sort, applySort])
 
-  async function openDetails(licenseNumber) {
-    setError('')
-    setLoading(true)
-    try {
-      const driver = await getDriver(licenseNumber)
-      setSelectedDriver(driver)
-      setSelectedLicenseNumber(licenseNumber)
-      setView('details')
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }
+  useEffect(() => {
+    if (!openLicenseNumber) return
+    openDetails(openLicenseNumber).finally(() => {
+      onNavigate?.({ key: 'drivers', returnTo: returnTo ?? null })
+    })
+  }, [openLicenseNumber, openDetails, onNavigate, returnTo])
 
   async function openEdit(licenseNumber) {
     setError('')
@@ -229,34 +229,6 @@ export default function DriversPage() {
     },
   ]
 
-  const shell = (
-    <AppShell
-      sidebar={
-        <Sidebar
-          brand={{
-            icon: <BadgeCheck className="size-6 text-blue-500" />,
-            title: 'LTO',
-            subtitle: 'Management',
-          }}
-          activeKey="drivers"
-          links={[
-            { key: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="size-5" /> },
-            { key: 'drivers', label: 'Drivers', icon: <Users className="size-5 text-blue-500" /> },
-            { key: 'vehicles', label: 'Vehicles', icon: <Car className="size-5" /> },
-            { key: 'registrations', label: 'Vehicle Registrations', icon: <ClipboardList className="size-5" /> },
-            { key: 'violations', label: 'Traffic Violations', icon: <TriangleAlert className="size-5" /> },
-            { key: 'reports', label: 'Reports', icon: <FileBarChart2 className="size-5" /> },
-          ]}
-          footer={{
-            line1: 'Land Transportation Office',
-            line2: 'Republic of the Philippines',
-          }}
-        />
-      }
-      topBar={<TopBar title="LTO Information Management System" right="LTO Admin Station 1A" />}
-    />
-  )
-
   if (view === 'create' || view === 'edit') {
     const isEdit = view === 'edit'
     const initialValues = isEdit
@@ -280,7 +252,7 @@ export default function DriversPage() {
       : null
 
     return (
-      <AppShell sidebar={shell.props.sidebar} topBar={shell.props.topBar}>
+      <AppFrame activeKey="drivers" onNavigate={onNavigate}>
         <div className="p-3">
           <PageHeader
             leading={
@@ -315,7 +287,7 @@ export default function DriversPage() {
             />
           </div>
         </div>
-      </AppShell>
+      </AppFrame>
     )
   }
 
@@ -341,14 +313,17 @@ export default function DriversPage() {
 
     // view details of a driver
     return (
-      <AppShell sidebar={shell.props.sidebar} topBar={shell.props.topBar}>
+      <AppFrame activeKey="drivers" onNavigate={onNavigate}>
         <div className="space-y-6">
           <div className="p-3">
             <PageHeader
               leading={
                 <button
                   type="button"
-                  onClick={() => setView('list')}
+                  onClick={() => {
+                    if (returnTo) return onNavigate?.(returnTo)
+                    setView('list')
+                  }}
                   className="grid size-12 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                   aria-label="Back"
                   title="Back"
@@ -377,15 +352,24 @@ export default function DriversPage() {
             />
 
             <SectionCard title="Personal Information" icon={<Users className="size-4" />}>
-              <KeyValueGrid
-                columns={4}
-                items={[
-                  { key: 'full_name', label: 'Full Name', value: <span className="font-bold">{selectedDriver.full_name}</span> },
-                  { key: 'dob', label: 'Date of Birth', value: <span className="font-bold">{selectedDriver.date_of_birth}</span> },
-                  { key: 'age', label: 'Age', value: <span className="font-bold">{age ? `${age} years old` : ''}</span> },
-                  { key: 'sex', label: 'Sex', value: <span className="font-bold">{selectedDriver.sex === 'M' ? 'Male' : 'Female'}</span> },
-                ]}
-              />
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Full Name</div>
+                  <div className="mt-1 font-bold">{selectedDriver.full_name}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Date of Birth</div>
+                  <div className="mt-1 font-bold">{selectedDriver.date_of_birth}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Age</div>
+                  <div className="mt-1 font-bold">{age ? `${age} years old` : ''}</div>
+                </div>
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Sex</div>
+                  <div className="mt-1 font-bold">{selectedDriver.sex === 'M' ? 'Male' : 'Female'}</div>
+                </div>
+              </div>
             </SectionCard>
 
             <SectionCard title="Address Information" icon={<ClipboardList className="size-4" />}>
@@ -393,20 +377,26 @@ export default function DriversPage() {
               <p>{selectedDriver.address?.province}, {selectedDriver.address?.region} {selectedDriver.address?.postal_code}</p>
             </SectionCard>
             <div className="flex justify-end">
-              <Button variant="secondary" onClick={() => setView('list')}>
-                Back to List
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  if (returnTo) return onNavigate?.(returnTo)
+                  setView('list')
+                }}
+              >
+                {returnTo ? 'Back to Vehicle' : 'Back to List'}
               </Button>
             </div>
           </div>
 
         </div>
-      </AppShell>
+      </AppFrame>
     )
   }
 
   // drivers list view
   return (
-    <AppShell sidebar={shell.props.sidebar} topBar={shell.props.topBar}>
+    <AppFrame activeKey="drivers" onNavigate={onNavigate}>
       <div className="p-3">
         <PageHeader
           title="Drivers"
@@ -477,6 +467,6 @@ export default function DriversPage() {
 
         {loading ? <div className="mt-4 text-sm text-slate-500">Loading...</div> : null}
       </div>
-    </AppShell>
+    </AppFrame>
   )
 }
