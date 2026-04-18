@@ -8,6 +8,7 @@
     "db:upgrade-enums": "node scripts/upgradeDriverEnums.js",
     "db:upgrade-region": "node scripts/upgradeAddressRegion.js",
     "db:upgrade-license-number": "node scripts/upgradeLicenseNumber.js",
+    "db:upgrade-vehicles": "node scripts/upgradeVehicles.js",
     "dev": "node --watch index.js",
     "start": "node index.js"
   },
