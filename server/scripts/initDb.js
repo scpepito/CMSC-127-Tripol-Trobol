@@ -57,7 +57,7 @@ async function main() {
     await conn.end()
   }
 
-  console.log(`Initialized DB using ${path.relative(process.cwd(), sqlFile)}`)
+  console.log(`Initialized DB using schema.sql and seed.sql`)
 }
 
 main().catch((err) => {

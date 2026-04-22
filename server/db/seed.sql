@@ -1,14 +1,3 @@
-
-LOAD DATA INFILE 'drivers.csv'
-INTO TABLE drivers
-FIELDS TERMINATED BY ','
-ENCLOSED BY '"'
-LINES TERMINATED BY '\n'
-IGNORE 1 ROWS
-(license_number, first_name, middle_name, last_name,
- date_of_birth, sex, license_type, license_status,
- issuance_date, expiration_date),
-
 INSERT INTO drivers (
   license_number, first_name, middle_name, last_name,
   date_of_birth, sex, license_type, license_status,
@@ -117,7 +106,7 @@ INSERT INTO driver_addresses (
 ('A1259216610', '226 Service Pass', 'Tabaco', 'Region V (Bicol Region)', 'Albay', '4511'),
 ('A1994566631', '664 Corry Way', 'Ligao', 'Region V (Bicol Region)', 'Albay', '4504'),
 ('A1365497173', '4 Grayhawk Street', 'Sorsogon City', 'Region V (Bicol Region)', 'Sorsogon', '4700'),
-('A1262306064', '4 Maywood Trail', 'Masbate City', 'Region IV-A (CALABARZON)', 'Masbate', '5400'),
+('A1262306064', '4 Maywood Trail', 'Masbate City', 'Region IV-A (CALABARZON)', 'Masbate', '5400');
 
 INSERT INTO vehicles (
   plate_number, engine_number, chassis_number, owner_license_number,
