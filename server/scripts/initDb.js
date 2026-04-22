@@ -9,9 +9,10 @@ dotenv.config()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const sqlFile = process.argv[2]
-  ? path.resolve(process.cwd(), process.argv[2])
-  : path.resolve(__dirname, '..', 'db', 'schema.sql')
+const sqlFiles = [
+  path.resolve(__dirname, '..', 'db', 'schema.sql'),
+  path.resolve(__dirname, '..', 'db', 'seed.sql')
+]
 
 function splitSqlStatements(sql) {
   return sql
@@ -20,29 +21,43 @@ function splitSqlStatements(sql) {
     .filter(Boolean)
 }
 
+async function runSqlFile(conn, filePath) {
+  const sql = await fs.readFile(filePath, 'utf8')
+  const statements = splitSqlStatements(sql)
+
+  for (const stmt of statements) {
+    await conn.query(stmt)
+  }
+
+  console.log(`Executed ${path.basename(filePath)}`)
+}
+
+
 async function main() {
   const host = process.env.DB_HOST ?? 'localhost'
   const port = Number(process.env.DB_PORT ?? 3306)
   const user = process.env.DB_USER ?? 'root'
   const password = process.env.DB_PASSWORD ?? ''
 
-  const sql = await fs.readFile(sqlFile, 'utf8')
-  const statements = splitSqlStatements(sql)
 
   const conn = await mariadb.createConnection({ host, port, user, password })
+
+
   try {
     // Allow dropping tables regardless of FK order during local init.
     // (Example: older schema versions may have extra child tables.)
     await conn.query('SET FOREIGN_KEY_CHECKS = 0')
-    for (const stmt of statements) {
-      await conn.query(stmt)
+
+    for (const file of sqlFiles) {
+      await runSqlFile(conn, file)
     }
+
     await conn.query('SET FOREIGN_KEY_CHECKS = 1')
   } finally {
     await conn.end()
   }
 
-  console.log(`Initialized DB using ${path.relative(process.cwd(), sqlFile)}`)
+  console.log(`Initialized DB using schema.sql and seed.sql`)
 }
 
 main().catch((err) => {
