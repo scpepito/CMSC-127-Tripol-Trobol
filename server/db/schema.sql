@@ -69,8 +69,8 @@ CREATE TABLE vehicles (
     ON UPDATE CASCADE
 );
 
-CREATE TABLE VEHICLE_REGISTRATION (
- 	registration_number INT PRIMARY KEY,
+CREATE TABLE vehicle_registrations (
+ 	registration_number INT PRIMARY KEY, -- registration number is an 11-digit integer
   registration_status VARCHAR(20),
   registration_date DATE,
   vehicle_plate_number VARCHAR(7),
