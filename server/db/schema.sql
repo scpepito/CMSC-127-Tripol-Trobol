@@ -73,7 +73,7 @@ CREATE TABLE vehicle_registrations (
  	registration_number INT PRIMARY KEY NOT NULL, -- registration number is an 11-digit integer
   registration_status ENUM('Active','Expired','Suspended') NOT NULL,
   registration_date DATE NOT NULL,
-  vehicle_plate_number VARCHAR(7) NOT NULL,
+  vehicle_plate_number VARCHAR(8) NOT NULL,
   expiration_date DATE NOT NULL,
 	
 CONSTRAINT registration_plate_number_fk

@@ -5,17 +5,17 @@ export function toStatusTone(status) {
   return 'neutral'
 }
 
-export function listRowFromApi(row) {
+export function listRowFromApi(registration) {
   return {
-    id: row.registration_number,
-    registrationNumber: row.registration_number,
-    expirationDate: row.expiration_date,
-    statusLabel: row.registration_status,
-    statusTone: toStatusTone(row.registration_status),
-    vehicleName: `${row.vehicle?.make} ${row.vehicle?.model} • ${row.vehicle?.year}`.trim(),
-    vehicleSub: row.vehicle?.plate_number,
-    ownerName: row.owner?.full_name ?? '',
-    ownerLicenseNumber: row.owner?.license_number ?? '',
-    _raw: vehicle_registration,
+    id: registration.registration_number,
+    registrationNumber: registration.registration_number,
+    expirationDate: registration.expiration_date,
+    statusLabel: registration.registration_status,
+    statusTone: toStatusTone(registration.registration_status),
+    vehicleName: `${registration.vehicle?.make} ${registration.vehicle?.model} • ${registration.vehicle?.year}`.trim(),
+    vehicleSub: registration.vehicle?.plate_number,
+    ownerName: registration.owner?.full_name ?? '',
+    ownerLicenseNumber: registration.owner?.license_number ?? '',
+    _raw: registration
   }
 }

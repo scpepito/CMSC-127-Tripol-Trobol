@@ -394,7 +394,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
     )
   }
 
-  // drivers list view
+  // drivers search form
   return (
     <AppFrame activeKey="drivers" onNavigate={onNavigate}>
       <div className="p-3">

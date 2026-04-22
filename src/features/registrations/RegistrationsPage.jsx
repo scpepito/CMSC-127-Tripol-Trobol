@@ -19,7 +19,8 @@ import {
   PageHeader,
   SearchInput,
   SectionCard,
-  RegistraionDetailsHero
+  RegistrationDetailsHero,
+  StatusPill
 } from '../../components/index.js'
 import { createRegistration, deleteRegistration, getRegistration, listRegistrations, updateRegistration  } from '../../api/registrations.js'
 import { formatLicenseNumber } from '../../lib/licenseNumber.js'
@@ -158,7 +159,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber }
     {
       key: 'registrationNumber',
       header: 'Registration Number',
-      width: 160,
+      width: 220,
       render: (row) => <span className="font-medium">{row.registrationNumber}</span>,
     },
     {

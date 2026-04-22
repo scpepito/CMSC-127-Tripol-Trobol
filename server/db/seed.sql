@@ -167,5 +167,5 @@ INSERT INTO vehicle_registrations (
   registration_number, registration_status, vehicle_plate_number,
   expiration_date, registration_date
 ) VALUES 
-('D0198765432', 'Active', 'XYZ-5678', '2028-09-06', '2024-09-06')
-('D0198765432', 'Expired', 'ABC-1234', '2025-09-06', '2022-09-06')
+('1234567890', 'Active', 'XYZ-5678', '2028-09-06', '2024-09-06'),
+('1234567891', 'Expired', 'ABC-1234', '2025-09-06', '2022-09-06')

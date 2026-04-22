@@ -12,6 +12,20 @@ function normalizeRegistrationStatus(value) {
   return value.trim()
 }
 
+function normalizeLicenseNumber(value) {
+  if (typeof value !== 'string') return value
+  return value.replace(/-/g, '').trim().toUpperCase()
+}
+
+function normalizePlateNumber(value) {
+  if (typeof value !== 'string') return value
+  const cleaned = value.replace(/\s+/g, '').toUpperCase()
+  if (/^[A-Z]{3}\d{4}$/.test(cleaned)) {
+    return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
+  }
+  return cleaned
+}
+
 // map row to registration details
 function mapRowToListRegistration(row) {
   return {
@@ -124,9 +138,9 @@ export async function listRegistrations(req, res) {
   }
 
   // search by registration status
-  if (type) {
+  if (status) {
     where.push('r.registration_status = ?')
-    params.push(type)
+    params.push(status)
   }
 
   const sql = `
@@ -141,14 +155,15 @@ export async function listRegistrations(req, res) {
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS owner_name
     FROM vehicle_registrations r
     JOIN vehicles v ON r.vehicle_plate_number = v.plate_number
-    JOIN drivers d ON d.license_number = v.owner_license_number
+    JOIN drivers d ON v.owner_license_number = d.license_number
     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
     ORDER BY r.registration_number ASC
     LIMIT 200
   `
 
   const rows = await query(sql, params)
-  res.json({ vehicle_registrations: rows.map(mapRowToListRegistration) })
+  if (!rows.length) return res.status(404).json({ error: 'No registration found' })
+  res.json({ registrations: rows.map(mapRowToListRegistration) })
 }
 
 // get and select registration given its reg number

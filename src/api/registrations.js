@@ -1,6 +1,6 @@
 import { apiFetch } from './http.js'
 
-export async function listRegistrations({ search = '', type = '' } = {}) {
+export async function listRegistrations({ search = '', status = '' } = {}) {
   const params = new URLSearchParams()
   if (search) params.set('search', search)
   if (status) params.set('status', status)

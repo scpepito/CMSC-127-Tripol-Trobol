@@ -28,7 +28,7 @@ export async function apiFetch(path, options) {
   }
 
   if (!res.ok) {
-    const message = data?.error || `Request failed (${res.status})`
+    const message = data?.error || `Request failed (${res.status}): ${res.statusText}`
     const err = new Error(message)
     err.status = res.status
     err.data = data
