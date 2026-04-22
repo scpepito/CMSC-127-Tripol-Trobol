@@ -8,6 +8,8 @@ import {
   Pencil,
   Plus,
   Trash2,
+  CarFront,
+  FileText
 } from 'lucide-react'
 import {
   AppFrame,
@@ -17,46 +19,46 @@ import {
   PageHeader,
   SearchInput,
   SectionCard,
-  VehicleDetailsHero,
+  RegistraionDetailsHero
 } from '../../components/index.js'
-import { createVehicle, deleteVehicle, getVehicle, listVehicles, updateVehicle } from '../../api/vehicles.js'
+import { createRegistration, deleteRegistration, getRegistration, listRegistrations, updateRegistration  } from '../../api/registrations.js'
 import { formatLicenseNumber } from '../../lib/licenseNumber.js'
 import RegistrationForm from './RegistrationForm.jsx'
 import { listRowFromApi } from './registrationMappers.js'
 
-const vehicleTypeFilterOptions = [
+const registrationStatusFilters = [
   { value: '', label: 'All' },
-  { value: 'Private Car', label: 'Private Car' },
-  { value: 'Motorcycle', label: 'Motorcycle' },
-  { value: 'Public Utility Vehicle', label: 'Public Utility Vehicle' },
+  { value: 'Active', label: 'Active' },
+  { value: 'Expired', label: 'Expired' },
+  { value: 'Suspended', label: 'Suspended' },
 ]
 
-export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
+export default function RegistrationsPage({ onNavigate, openRegistrationNumber }) {
   const [view, setView] = useState('list') // list | create | edit | details
-  const [selectedPlateNumber, setSelectedPlateNumber] = useState(null)
+  const [selectedRegistrationNumber, setSelectedRegistrationNumber] = useState(null)
 
   const [search, setSearch] = useState('')
-  const [type, setType] = useState('')
+  const [status, setStatus] = useState('')
 
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
-  const [vehicles, setVehicles] = useState([])
-  const [selectedVehicle, setSelectedVehicle] = useState(null)
+  const [registrations, setRegistrations] = useState([])
+  const [selectedRegistration, setSelectedRegistration] = useState(null)
 
   const refreshList = useCallback(async () => {
-    const rows = await listVehicles({ search, type })
-    setVehicles(rows.map(listRowFromApi))
-  }, [search, type])
+    const rows = await listRegistrations({ search, status })
+    setRegistrations(rows.map(listRowFromApi))
+  }, [search, status])
 
-  const openDetails = useCallback(async (plateNumber) => {
+  const openDetails = useCallback(async (regNumber) => {
     setError('')
     setLoading(true)
     try {
-      const vehicle = await getVehicle(plateNumber)
-      setSelectedVehicle(vehicle)
-      setSelectedPlateNumber(plateNumber)
+      const registration = await getRegistration(regNumber)
+      setSelectedRegistration(registration)
+      setSelectedRegistrationNumber(regNumber)
       setView('details')
     } catch (e) {
       setError(e.message)
@@ -72,8 +74,8 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
       setError('')
       setLoading(true)
       try {
-        const rows = await listVehicles({ search, type })
-        if (!cancelled) setVehicles(rows.map(listRowFromApi))
+        const rows = await listRegistrations({ search, status })
+        if (!cancelled) setRegistrations(rows.map(listRowFromApi))
       } catch (e) {
         if (!cancelled) setError(e.message)
       } finally {
@@ -85,22 +87,22 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
     return () => {
       cancelled = true
     }
-  }, [search, type])
+  }, [search, status])
 
   useEffect(() => {
-    if (!openPlateNumber) return
-    openDetails(openPlateNumber).finally(() => {
+    if (!openRegistrationNumber) return
+    openDetails(openRegistrationNumber).finally(() => {
       onNavigate?.({ key: 'registrations' })
     })
-  }, [openPlateNumber, openDetails, onNavigate])
+  }, [openRegistrationNumber, openDetails, onNavigate])
 
-  async function openEdit(plateNumber) {
+  async function openEdit(regNumber) {
     setError('')
     setLoading(true)
     try {
-      const vehicle = await getVehicle(plateNumber)
-      setSelectedVehicle(vehicle)
-      setSelectedPlateNumber(plateNumber)
+      const registration = await getRegistration(regNumber)
+      setSelectedRegistration(registration)
+      setSelectedRegistrationNumber(regNumber)
       setView('edit')
     } catch (e) {
       setError(e.message)
@@ -109,11 +111,11 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
     }
   }
 
-  async function handleDelete(plateNumber) {
+  async function handleDelete(regNumber) {
     setError('')
     setSaving(true)
     try {
-      await deleteVehicle(plateNumber)
+      await deleteRegistration(regNumber)
       await refreshList()
     } catch (e) {
       setError(e.message)
@@ -126,7 +128,7 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
     setError('')
     setSaving(true)
     try {
-      await createVehicle(values)
+      await createRegistration(values)
       setView('list')
       await refreshList()
     } catch (e) {
@@ -140,10 +142,10 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
     setError('')
     setSaving(true)
     try {
-      await updateVehicle(selectedPlateNumber, values)
+      await updateRegistration(selectedRegistrationNumber, values)
       setView('list')
-      setSelectedVehicle(null)
-      setSelectedPlateNumber(null)
+      setSelectedRegistration(null)
+      setSelectedRegistrationNumber(null)
       await refreshList()
     } catch (e) {
       setError(e.message)
@@ -154,10 +156,10 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
 
   const columns = [
     {
-      key: 'plateNumber',
-      header: 'Plate Number',
+      key: 'registrationNumber',
+      header: 'Registration Number',
       width: 160,
-      render: (row) => <span className="font-medium">{row.plateNumber}</span>,
+      render: (row) => <span className="font-medium">{row.registrationNumber}</span>,
     },
     {
       key: 'vehicle',
@@ -169,8 +171,21 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
         </div>
       ),
     },
-    { key: 'type', header: 'Type', width: 220, render: (row) => <span className="text-slate-600">{row.type}</span> },
     { key: 'owner', header: 'Owner', width: 220, render: (row) => <span className="text-slate-600">{row.ownerName}</span> },
+    {
+      key: 'status',
+      header: 'Status',
+      width: 160,
+      render: (row) => (
+        <StatusPill tone={row.statusTone}>{row.statusLabel}</StatusPill>
+      ),
+    },
+    {
+      key: 'expiration',
+      header: 'Expiration',
+      width: 160,
+      render: (row) => <span className="text-slate-600">{row.expirationDate}</span>,
+    },
     {
       key: 'actions',
       header: 'Actions',
@@ -180,7 +195,7 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => openDetails(row.plateNumber)}
+            onClick={() => openDetails(row.regNumber)}
             className="grid size-9 place-items-center rounded-xl bg-white cursor-pointer disabled:cursor-not-allowed"
             aria-label="View"
             title="View"
@@ -189,7 +204,7 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
           </button>
           <button
             type="button"
-            onClick={() => openEdit(row.plateNumber)}
+            onClick={() => openEdit(row.regNumber)}
             className="grid size-9 place-items-center rounded-xl bg-white cursor-pointer disabled:cursor-not-allowed "
             aria-label="Edit"
             title="Edit"
@@ -198,7 +213,7 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
           </button>
           <button
             type="button"
-            onClick={() => handleDelete(row.plateNumber)}
+            onClick={() => handleDelete(row.regNumber)}
             disabled={saving}
             className="grid size-9 place-items-center rounded-xl bg-white cursor-pointer disabled:cursor-not-allowed"
             aria-label="Delete"
@@ -211,6 +226,7 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
     },
   ]
 
+  // create / edit registration
   if (view === 'create' || view === 'edit') {
     return (
       <AppFrame activeKey="registrations" onNavigate={onNavigate}>
@@ -220,6 +236,7 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
               <button
                 type="button"
                 onClick={() => setView('list')}
+                // TODO: update colors
                 className="grid size-11 place-items-center rounded-[14px] bg-[#fbf3fd] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
                 title="Back"
@@ -227,24 +244,25 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
                 <ArrowLeft className="size-6 text-[#bf68c5]" />
               </button>
             }
-            title={view === 'create' ? 'Add New Vehicle' : 'Edit Vehicle'}
-            subtitle="Register a new vehicle in the system"
+            title={view === 'create' ? 'Register Vehicle' : 'Edit Vehicle Registration'}
+            subtitle="Register an existing vehicle in the system"
           />
 
           {error ? (
+            // TODO: update colors
             <div className="mt-6 rounded-[14px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           ) : null}
 
           <div className="mt-6">
-            <VehicleForm
-              key={view === 'edit' ? (selectedVehicle?.plate_number ?? 'edit') : 'create'}
-              initialValues={view === 'edit' ? selectedVehicle : null}
+            <RegistrationForm
+              key={view === 'edit' ? (selectedRegistration?.registration_number ?? 'edit') : 'create'}
+              initialValues={view === 'edit' ? selectedRegistration : null}
               onSubmit={view === 'edit' ? handleUpdate : handleCreate}
               onCancel={() => setView('list')}
               saving={saving}
-              submitLabel="Save Vehicle"
+              submitLabel="Register Vehicle"
             />
           </div>
         </div>
@@ -252,7 +270,17 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
     )
   }
 
-  if (view === 'details' && selectedVehicle) {
+  // view specific registration
+  if (view === 'details' && selectedRegistration) {
+    const statusNode = (
+      <StatusPill
+        tone={toStatusTone(selectedRegistration.registration_status)}
+        className="bg-[#d1fae5] text-[#0f7a33] ring-0"
+      >
+        {selectedRegistration.registration_status}
+      </StatusPill>
+    )
+
     return (
       <AppFrame activeKey="registrations" onNavigate={onNavigate}>
         <div className="p-3">
@@ -261,6 +289,8 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
               <button
                 type="button"
                 onClick={() => setView('list')}
+                
+                /*TODO: update colors*/
                 className="grid size-12 place-items-center rounded-[14px] bg-[#fbf3fd] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
                 title="Back"
@@ -268,86 +298,91 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
                 <ArrowLeft className="size-6 text-[#bf68c5]" />
               </button>
             }
-            title="Vehicle Details"
-            subtitle={`${selectedVehicle.plate_number} - ${selectedVehicle.make} ${selectedVehicle.model}`}
+            title="Registration Details"
+            subtitle={`${selectedRegistration.registration_number} - ${selectedRegistration.vehicle?.make} ${selectedRegistration.vehicle?.model}`}
             action={
-              <Button variant="pink" leftIcon={<Pencil className="size-5" />} onClick={() => openEdit(selectedVehicle.plate_number)}>
-                Edit Vehicle
+              // TODO: update colors
+              <Button variant="pink" leftIcon={<Pencil className="size-5" />} onClick={() => openEdit(selectedRegistration.registration_number)}>
+                Edit Vehicle Registration
               </Button>
             }
           />
 
           <div className="mt-6 space-y-6">
-            <VehicleDetailsHero
-              plateNumber={selectedVehicle.plate_number}
-              vehicleName={`${selectedVehicle.make} ${selectedVehicle.model}`.trim()}
-              vehicleSub={`${selectedVehicle.year} • ${selectedVehicle.color}`}
-              type={selectedVehicle.vehicle_type}
-              ownerName={selectedVehicle.owner?.full_name ?? ''}
-              ownerLicense={formatLicenseNumber(selectedVehicle.owner?.license_number ?? '')}
+            <RegistrationDetailsHero
+              registrationNumber={selectedRegistration.registration_number}
+              registrationDate={selectedRegistration.registration_date}
+              expirationDate={selectedRegistration.expiration_ate}
+              registrationStatus={statusNode}
+              vehiclePlate={selectedRegistration.vehicle?.plate_number}
+              vehicleSub={`${selectedRegistration.vehicle?.make} ${selectedRegistration.vehicle?.model} (${selectedRegistration.vehicle?.year})`}
+              ownerName={selectedRegistration.owner?.full_name ?? ''}
+              ownerLicense={formatLicenseNumber(selectedRegistration.owner?.license_number ?? '')}
             />
 
             <SectionCard title="Vehicle Information" accent="pink">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Plate Number</div>
-                  <div className="mt-1 font-bold">{selectedVehicle.plate_number}</div>
+              <button
+                type="button"
+                disabled={!selectedRegistration.vehicle?.plate_number}
+                onClick={() => {
+                  const plateNumber = selectedRegistration.vehicle?.plate_number
+                  if (!plateNumber) return
+                  onNavigate?.({
+                    key: 'vehicles',
+                    vehiclePlateNumber: plateNumber,
+                    returnTo: { key: 'registrations', regNumber: selectedRegistration.registration_number },
+                  })
+                }}
+                className="flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 enabled:cursor-pointer enabled:hover:bg-slate-50 disabled:opacity-60"
+                aria-label={selectedRegistration.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
+                title={selectedRegistration.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
+              >
+                <div className="grid size-12 place-items-center rounded-2xl bg-[#fbf3fd] text-[#bf68c5] ring-1 ring-[#cf89d4]/40">
+                  <CarFront className="size-5" />
                 </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Make & Model</div>
-                  <div className="mt-1 font-bold">{`${selectedVehicle.make} ${selectedVehicle.model}`.trim()}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-semibold">{selectedRegistration.vehicle?.plate_number}</div>
+                  <div className="mt-0.5 text-sm text-slate-500">
+                    {`${selectedRegistration.vehicle?.make} ${selectedRegistration.vehicle?.model} (${selectedRegistration.vehicle?.year})`}
+                  </div>
                 </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Year</div>
-                  <div className="mt-1 font-bold">{selectedVehicle.year}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Color</div>
-                  <div className="mt-1 font-bold">{selectedVehicle.color}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Vehicle Type</div>
-                  <div className="mt-1 font-bold">{selectedVehicle.vehicle_type}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Engine Number</div>
-                  <div className="mt-1 font-bold">{selectedVehicle.engine_number}</div>
-                </div>
-                <div className="md:col-span-2">
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Chassis Number</div>
-                  <div className="mt-1 font-bold">{selectedVehicle.chassis_number}</div>
-                </div>
-              </div>
+                <ChevronRight className="size-5 shrink-0 text-slate-400" />
+              </button>
             </SectionCard>
 
             <SectionCard title="Owner Information" accent="pink">
               <button
                 type="button"
-                disabled={!selectedVehicle.owner?.license_number}
+                disabled={!selectedRegistration.owner?.license_number}
                 onClick={() => {
-                  const licenseNumber = selectedVehicle.owner?.license_number
+                  const licenseNumber = selectedRegistration.owner?.license_number
                   if (!licenseNumber) return
                   onNavigate?.({
                     key: 'drivers',
                     driverLicenseNumber: licenseNumber,
-                    returnTo: { key: 'vehicles', plateNumber: selectedVehicle.plate_number },
+                    returnTo: { key: 'registrations', regNumber: selectedRegistration.registration_number },
                   })
                 }}
                 className="flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 enabled:cursor-pointer enabled:hover:bg-slate-50 disabled:opacity-60"
-                aria-label={selectedVehicle.owner?.license_number ? 'View owner details' : 'Owner not available'}
-                title={selectedVehicle.owner?.license_number ? 'View owner details' : 'Owner not available'}
+                aria-label={selectedRegistration.owner?.license_number ? 'View owner details' : 'Owner not available'}
+                title={selectedRegistration.owner?.license_number ? 'View owner details' : 'Owner not available'}
               >
                 <div className="grid size-12 place-items-center rounded-2xl bg-[#fbf3fd] text-[#bf68c5] ring-1 ring-[#cf89d4]/40">
                   <User className="size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-semibold">{selectedVehicle.owner?.full_name}</div>
+                  <div className="truncate font-semibold">{selectedRegistration.owner?.full_name}</div>
                   <div className="mt-0.5 text-sm text-slate-500">
-                    License: {formatLicenseNumber(selectedVehicle.owner?.license_number ?? '')}
+                    License: {formatLicenseNumber(selectedRegistration.owner?.license_number ?? '')}
                   </div>
                 </div>
                 <ChevronRight className="size-5 shrink-0 text-slate-400" />
               </button>
+            </SectionCard>
+
+            {/* List of registrations */}
+            <SectionCard title={`Registration History (${0})`}>
+
             </SectionCard>
 
           </div>
@@ -360,31 +395,31 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
     <AppFrame activeKey="registrations" onNavigate={onNavigate}>
       <div className="p-3">
         <PageHeader
-          title="Vehicles"
-          subtitle="List, view, edit, and manage vehicle records."
+          title="Vehicle Registrations"
+          subtitle="List, view, edit, and manage vehicle registrations."
           action={
             <Button variant="pink" leftIcon={<Plus className="size-5" />} onClick={() => setView('create')}>
-              Add Vehicle
+              Register Vehicle
             </Button>
           }
         />
-
+        {/*TODO: update colors*/}
         <div className="mt-6 rounded-2xl border border-[#cf89d4] bg-[#fbf3fd] p-6 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row">
             <div className="flex-1">
               <SearchInput
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by plate number, make, model, or owner..."
+                placeholder="Search by registration number, license plate, owner, or vehicle..."
               />
             </div>
 
             <div className="w-full md:w-70">
               <Combobox
                 leftIcon={<Filter className="size-5" />}
-                value={type}
-                onChange={(v) => setType(v)}
-                options={vehicleTypeFilterOptions}
+                value={status}
+                onChange={(v) => setStatus(v)}
+                options={registrationStatusFilters}
                 placeholder="Filter"
                 searchable={false}
               />
@@ -400,9 +435,10 @@ export default function RegistrationsPage({ onNavigate, openPlateNumber }) {
 
         <div className="mt-6">
           <DataTable
+            // TODO: update colors
             theadClassName="bg-[#fbf3fd]"
             columns={columns}
-            rows={vehicles}
+            rows={registrations}
             getRowKey={(row) => row.id}
           />
         </div>

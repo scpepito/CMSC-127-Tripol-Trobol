@@ -1,12 +1,21 @@
-export function listRowFromApi(vehicle) {
+export function toStatusTone(status) {
+  if (status === 'Valid') return 'success'
+  if (status === 'Expired') return 'danger'
+  if (status === 'Suspended') return 'warning'
+  return 'neutral'
+}
+
+export function listRowFromApi(row) {
   return {
-    id: vehicle.plate_number,
-    plateNumber: vehicle.plate_number,
-    vehicleName: `${vehicle.make} ${vehicle.model}`.trim(),
-    vehicleSub: `${vehicle.year} • ${vehicle.color}`,
-    type: vehicle.vehicle_type,
-    ownerName: vehicle.owner?.full_name ?? '',
-    ownerLicenseNumber: vehicle.owner?.license_number ?? '',
-    _raw: vehicle,
+    id: row.registration_number,
+    registrationNumber: row.registration_number,
+    expirationDate: row.expiration_date,
+    statusLabel: row.registration_status,
+    statusTone: toStatusTone(row.registration_status),
+    vehicleName: `${row.vehicle?.make} ${row.vehicle?.model} • ${row.vehicle?.year}`.trim(),
+    vehicleSub: row.vehicle?.plate_number,
+    ownerName: row.owner?.full_name ?? '',
+    ownerLicenseNumber: row.owner?.license_number ?? '',
+    _raw: vehicle_registration,
   }
 }

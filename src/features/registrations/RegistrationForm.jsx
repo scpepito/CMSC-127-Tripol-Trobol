@@ -20,7 +20,7 @@ function normalizePlateInput(value) {
   return `${raw.slice(0, 3)}-${raw.slice(3)}`
 }
 
-export default function VehicleForm({
+export default function RegistrationForm({
   initialValues,
   onSubmit,
   onCancel,

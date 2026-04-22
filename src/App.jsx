@@ -2,6 +2,7 @@ import { useState } from 'react'
 import DriversPage from './features/drivers/DriversPage.jsx'
 import VehiclesPage from './features/vehicles/VehiclesPage.jsx'
 import { AppFrame } from './components/index.js'
+import RegistrationsPage from './features/registrations/RegistrationsPage.jsx'
 
 function App() {
   const [route, setRoute] = useState({ key: 'drivers' })
@@ -28,6 +29,10 @@ function App() {
 
   if (route.key === 'vehicles') {
     return <VehiclesPage onNavigate={navigate} openPlateNumber={route.plateNumber} />
+  }
+
+  if (route.key === 'registrations') {
+    return <RegistrationsPage onNavigate={navigate} openRegistrationNumber={route.regNumber} />
   }
 
   return (

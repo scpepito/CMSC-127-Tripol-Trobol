@@ -134,9 +134,9 @@ export async function listRegistrations(req, res) {
       r.registration_number,
       DATE_FORMAT(r.expiration_date, '%Y-%m-%d') AS expiration_date,
       r.registration_status,
-      v.make,
-      v.model,
-      v.year,
+      v.make AS vehicle_make,
+      v.model AS vehicle_model,
+      v.year AS vehicle_year,
       v.plate_number AS vehicle_plate_number,
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS owner_name
     FROM vehicle_registrations r
