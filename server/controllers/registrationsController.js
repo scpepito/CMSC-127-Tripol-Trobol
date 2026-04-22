@@ -52,7 +52,7 @@ function mapRowToRegistrationDetails(row) {
 }
 
 // parses and trims all fields of body
-function parseRegistrationPaylod(body) {
+function parseRegistrationPayload(body) {
 	return {
 		registration_number: toTrimmed(body.registration_number),
 		registration_date: toTrimmed(body.registration_date),
@@ -99,6 +99,7 @@ function validateRegistrationPayload(res, payload, { requireRegistrationNumber }
   return null
 }
 
+// get and select registrations given parameters
 export async function listRegistrations(req, res) {
   const search = typeof req.query.search === 'string' ? req.query.search.trim() : ''
   const status = typeof req.query.status === 'string' ? normalizeRegistrationStatus(req.query.status) : ''
@@ -112,7 +113,7 @@ export async function listRegistrations(req, res) {
     const sPlate = normalizePlateNumber(s)
     const sOwnerLicense = normalizeLicenseNumber(s)
     where.push(
-      `(r.registration_number LIKE ? OR
+      `(r.registration_number = ? OR
       v.plate_number LIKE ? OR 
       v.make LIKE ? OR 
       v.model LIKE ? OR 
@@ -138,7 +139,7 @@ export async function listRegistrations(req, res) {
       v.year,
       v.plate_number AS vehicle_plate_number,
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS owner_name
-    FROM vehicle_registrations
+    FROM vehicle_registrations r
     JOIN vehicles v ON r.vehicle_plate_number = v.plate_number
     JOIN drivers d ON d.license_number = v.owner_license_number
     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
@@ -150,8 +151,8 @@ export async function listRegistrations(req, res) {
   res.json({ vehicle_registrations: rows.map(mapRowToListRegistration) })
 }
 
-export async function getVehicle(req, res) {
-  // TODO: reg number format
+// get and select registration given its reg number
+export async function getRegistration(req, res) {
   const registrationNumber = toTrimmed(req.params.registration_number)
 
   const rows = await query(
@@ -167,7 +168,7 @@ export async function getVehicle(req, res) {
       v.plate_number AS vehicle_plate_number,
       d.license_number,
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS owner_name
-    FROM vehicle_registrations
+    FROM vehicle_registrations r
     JOIN vehicles v ON r.vehicle_plate_number = v.plate_number
     JOIN drivers d ON d.license_number = v.owner_license_number
     WHERE r.registration_number = ?
@@ -183,42 +184,42 @@ export async function getVehicle(req, res) {
   res.json({ registration })
 }
 
-
-// TODO: update functions
-export async function createVehicle(req, res) {
-  const payload = parseVehiclePayload(req.body)
-  const error = validateVehiclePayload(res, payload, { requirePlateNumber: true })
+// creates and inserts a vehicle registration
+export async function createRegistration(req, res) {
+  const payload = parseRegistrationPayload(req.body)
+  const error = validateRegistrationPayload(res, payload, { requireRegistrationNumber: true })
   if (error) return
 
   try {
     await query(
       `
-        INSERT INTO vehicles (
-          plate_number, engine_number, chassis_number, owner_license_number,
-          vehicle_type, make, model, year, color
+        INSERT INTO vehicle_registrations (
+          registration_number, registration_status, vehicle_plate_number,
+          expiration_date, registration_date
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       [
-        payload.plate_number,
-        payload.engine_number,
-        payload.chassis_number,
-        payload.owner_license_number,
-        payload.vehicle_type,
-        payload.make,
-        payload.model,
-        payload.year,
-        payload.color,
+        payload.registration_number,
+        payload.registration_status,
+        payload.vehicle_plate_number,
+        payload.expiration_date,
+        payload.registration_date,
       ],
     )
   } catch (e) {
     if (String(e?.code) === 'ER_DUP_ENTRY') {
       const msg = String(e?.sqlMessage ?? '').toLowerCase()
-      if (msg.includes('uk_engine')) return res.status(409).json({ error: 'engine_number already exists' })
-      if (msg.includes('uk_chassis')) return res.status(409).json({ error: 'chassis_number already exists' })
-      return res.status(409).json({ error: 'Vehicle already exists' })
+      return res.status(409).json({ error: 'Vehicle registration already exists' })
     }
     if (String(e?.code) === 'ER_NO_REFERENCED_ROW_2') {
-      return badRequest(res, 'owner_license_number does not exist')
+      return badRequest(res, 'vehicle_plate_number does not exist')
+    }
+    if (Number(e?.errno) === 1265) {
+      return badRequest(
+        res,
+        'Invalid registration_status for current DB schema',
+        'Run server/db/schema.sql or `npm run db:upgrade-enums`.',
+      )
     }
     throw e
   }
@@ -226,103 +227,60 @@ export async function createVehicle(req, res) {
   res.status(201).json({ ok: true })
 }
 
-export async function updateVehicle(req, res) {
-  const plateNumber = normalizePlateNumber(req.params.plate_number)
-  const payload = parseVehiclePayload(req.body)
-  const error = validateVehiclePayload(res, payload, { requirePlateNumber: false })
+// update vehicle registration
+export async function updateRegistration(req, res) {
+  const regNumber = toTrimmed(req.params.registration_number)
+  const payload = parseRegistrationPayload(req.body)
+  const error = validateRegistrationPayload(res, payload, { requireRegistrationNumber: false })
   if (error) return
 
-  if (payload.plate_number && payload.plate_number !== plateNumber) {
-    // Allow updating the plate number (PK) by setting it explicitly.
-    // This relies on ON UPDATE CASCADE on any dependent tables.
-    try {
-      await query(
-        `
-          UPDATE vehicles
-          SET
-            plate_number = ?,
-            engine_number = ?,
-            chassis_number = ?,
-            owner_license_number = ?,
-            vehicle_type = ?,
-            make = ?,
-            model = ?,
-            year = ?,
-            color = ?
-          WHERE plate_number = ?
-        `,
-        [
-          payload.plate_number,
-          payload.engine_number,
-          payload.chassis_number,
-          payload.owner_license_number,
-          payload.vehicle_type,
-          payload.make,
-          payload.model,
-          payload.year,
-          payload.color,
-          plateNumber,
-        ],
-      )
-    } catch (e) {
-      if (String(e?.code) === 'ER_DUP_ENTRY') {
-        const msg = String(e?.sqlMessage ?? '').toLowerCase()
-        if (msg.includes('uk_engine')) return res.status(409).json({ error: 'engine_number already exists' })
-        if (msg.includes('uk_chassis')) return res.status(409).json({ error: 'chassis_number already exists' })
-        return res.status(409).json({ error: 'plate_number already exists' })
-      }
-      if (String(e?.code) === 'ER_NO_REFERENCED_ROW_2') {
-        return badRequest(res, 'owner_license_number does not exist')
-      }
-      throw e
+  try {
+    // sql query
+    await query(
+      `
+        UPDATE vehicles
+        SET
+          registration_status = ?,
+          registration_date = ?,
+          vehicle_plate_number = ?,
+          expiration_date = ?
+        WHERE registration_number = ?
+      `,
+      [
+        payload.registration_status,
+        payload.registration_date,
+        payload.vehicle_plate_number,
+        payload.expiration_date,
+        regNumber
+      ],
+    )
+  } catch (e) {
+    // FK error
+    if (String(e?.code) === 'ER_NO_REFERENCED_ROW_2') {
+      return badRequest(res, 'vehicle_plate_number does not exist')
     }
-  } else {
-    try {
-      await query(
-        `
-          UPDATE vehicles
-          SET
-            engine_number = ?,
-            chassis_number = ?,
-            owner_license_number = ?,
-            vehicle_type = ?,
-            make = ?,
-            model = ?,
-            year = ?,
-            color = ?
-          WHERE plate_number = ?
-        `,
-        [
-          payload.engine_number,
-          payload.chassis_number,
-          payload.owner_license_number,
-          payload.vehicle_type,
-          payload.make,
-          payload.model,
-          payload.year,
-          payload.color,
-          plateNumber,
-        ],
+    // status does not exist
+    if (Number(e?.errno) === 1265) {
+      return badRequest(
+        res,
+        'Invalid registration_status for current DB schema',
+        'Run server/db/schema.sql or `npm run db:upgrade-enums`.',
       )
-    } catch (e) {
-      if (String(e?.code) === 'ER_NO_REFERENCED_ROW_2') {
-        return badRequest(res, 'owner_license_number does not exist')
-      }
-      throw e
     }
-  }
+    throw e
+  } 
 
-  const exists = await query('SELECT plate_number FROM vehicles WHERE plate_number = ? LIMIT 1', [
-    payload.plate_number ?? plateNumber,
+  const exists = await query('SELECT registration_number FROM vehicle_registrations WHERE registration_number = ? LIMIT 1', [
+    payload.registration_number ?? regNumber,
   ])
   if (!exists.length) return res.status(404).json({ error: 'Vehicle not found' })
 
   res.json({ ok: true })
 }
 
-export async function deleteVehicle(req, res) {
-  const plateNumber = normalizePlateNumber(req.params.plate_number)
-  const result = await query('DELETE FROM vehicles WHERE plate_number = ?', [plateNumber])
-  if (result.affectedRows === 0) return res.status(404).json({ error: 'Vehicle not found' })
+export async function deleteRegistration(req, res) {
+  const regNumber = toTrimmed(req.params.registration_number)
+  const result = await query('DELETE FROM vehicle_registrations WHERE registration_number = ?', [regNumber])
+  if (result.affectedRows === 0) return res.status(404).json({ error: 'Vehicle registration not found' })
   res.status(204).end()
 }

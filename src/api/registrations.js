@@ -1,36 +1,36 @@
 import { apiFetch } from './http.js'
 
-export async function listVehicles({ search = '', type = '' } = {}) {
+export async function listRegistrations({ search = '', type = '' } = {}) {
   const params = new URLSearchParams()
   if (search) params.set('search', search)
-  if (type) params.set('type', type)
+  if (status) params.set('status', status)
   const qs = params.toString()
-  const { data } = await apiFetch(`/vehicles${qs ? `?${qs}` : ''}`)
-  return data.vehicles
+  const { data } = await apiFetch(`/registrations${qs ? `?${qs}` : ''}`)
+  return data.registrations
 }
 
-export async function getVehicle(plateNumber) {
-  const { data } = await apiFetch(`/vehicles/${encodeURIComponent(plateNumber)}`)
-  return data.vehicle
+export async function getRegistration(regNumber) {
+  const { data } = await apiFetch(`/registrations/${encodeURIComponent(regNumber)}`)
+  return data.registration
 }
 
-export async function createVehicle(payload) {
-  const { data } = await apiFetch('/vehicles', {
+export async function createRegistration(payload) {
+  const { data } = await apiFetch('/registrations', {
     method: 'POST',
     body: JSON.stringify(payload),
   })
-  return data.vehicle
+  return data.registration
 }
 
-export async function updateVehicle(plateNumber, payload) {
-  const { data } = await apiFetch(`/vehicles/${encodeURIComponent(plateNumber)}`, {
+export async function updateRegistration(regNumber, payload) {
+  const { data } = await apiFetch(`/registrations/${encodeURIComponent(regNumber)}`, {
     method: 'PUT',
     body: JSON.stringify(payload),
   })
-  return data.vehicle
+  return data.registration
 }
 
-export async function deleteVehicle(plateNumber) {
-  await apiFetch(`/vehicles/${encodeURIComponent(plateNumber)}`, { method: 'DELETE' })
+export async function deleteRegistration(regNumber) {
+  await apiFetch(`/registrations/${encodeURIComponent(regNumber)}`, { method: 'DELETE' })
 }
 
