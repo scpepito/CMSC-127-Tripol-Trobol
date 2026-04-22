@@ -68,3 +68,14 @@ CREATE TABLE vehicles (
     ON DELETE RESTRICT
     ON UPDATE CASCADE
 );
+
+CREATE TABLE VEHICLE_REGISTRATION (
+ 	registration_number INT PRIMARY KEY,
+  registration_status VARCHAR(20),
+  registration_date DATE,
+  vehicle_plate_number VARCHAR(7),
+  expiration_date DATE,
+	
+CONSTRAINT registration_plate_number_fk
+ 	FOREIGN KEY (vehicle_plate_number) REFERENCES VEHICLE(plate_number)
+);
