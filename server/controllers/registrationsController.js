@@ -196,7 +196,7 @@ export async function createRegistration(req, res) {
         INSERT INTO vehicle_registrations (
           registration_number, registration_status, vehicle_plate_number,
           expiration_date, registration_date
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?)
       `,
       [
         payload.registration_number,

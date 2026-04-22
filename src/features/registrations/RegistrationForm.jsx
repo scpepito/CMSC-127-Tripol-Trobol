@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
 import { Button, Combobox, FormField, TextInput, SectionCard } from '../../components/index.js'
 import { listDrivers } from '../../api/drivers.js'
-import { formatLicenseNumber } from '../../lib/licenseNumber.js'
+import { listRegistrations } from '../../api/registrations.js'
 
 const vehicleTypeOptions = [
   { value: 'Private Car', label: 'Private Car' },
@@ -10,22 +10,12 @@ const vehicleTypeOptions = [
   { value: 'Public Utility Vehicle', label: 'Public Utility Vehicle' },
 ]
 
-function normalizePlateInput(value) {
-  const raw = String(value ?? '')
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '')
-    .slice(0, 7)
-
-  if (raw.length <= 3) return raw
-  return `${raw.slice(0, 3)}-${raw.slice(3)}`
-}
-
 export default function RegistrationForm({
   initialValues,
   onSubmit,
   onCancel,
   saving,
-  submitLabel = 'Save Vehicle',
+  submitLabel = 'Save Registration',
 }) {
   const [plateNumber, setPlateNumber] = useState(() => initialValues?.plate_number ?? '')
   const [engineNumber, setEngineNumber] = useState(() => initialValues?.engine_number ?? '')
@@ -37,7 +27,7 @@ export default function RegistrationForm({
   const [year, setYear] = useState(() => initialValues?.year ?? '')
   const [color, setColor] = useState(() => initialValues?.color ?? '')
 
-  const [drivers, setDrivers] = useState([])
+  const [vehicle, setVehicle] = useState([])
 
   useEffect(() => {
     let cancelled = false

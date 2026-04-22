@@ -162,3 +162,10 @@ INSERT INTO vehicles (
 ('URU-6719', 'HJ0646-02150530', 'MKNHPC1B91W742524', 'A1994566631', 'Private Car', 'Audi', 'A6', 1996, 'Aquamarine'),
 ('JIE-7455', 'GP1728-87837845', 'PCP1PPC1MPB527357', 'A1365497173', 'Motorcycle', 'BMW', 'M6', 2006, 'Turquoise'),
 ('WWF-2358', 'KB5822-73300002', 'L158F8P3WED202229', 'A1262306064', 'Public Utility Vehicle', 'Chrysler', 'Concorde', 2002, 'Blue');
+
+INSERT INTO vehicle_registrations (
+  registration_number, registration_status, vehicle_plate_number,
+  expiration_date, registration_date
+) VALUES 
+('D0198765432', 'Active', 'XYZ-5678', '2028-09-06', '2024-09-06')
+('D0198765432', 'Expired', 'ABC-1234', '2025-09-06', '2022-09-06')
