@@ -61,7 +61,7 @@ export default function RegistrationDetailsHero({
         </div>
 
         <div className="space-y-8 mt-4">
-          <Field label="Expiration Date">{formatLongDate(registrationDate)}</Field>
+          <Field label="Expiration Date">{formatLongDate(expirationDate)}</Field>
           <Field label="Registration Date">{formatLongDate(registrationDate)}</Field>
         </div>
       </div>
