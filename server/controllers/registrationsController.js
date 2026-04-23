@@ -169,7 +169,7 @@ export async function listRegistrations(req, res) {
 // get and select registration given its reg number
 export async function getRegistration(req, res) {
   const registrationNumber = toTrimmed(req.params.registration_number)
-
+  
   const rows = await query(
     `
     SELECT
@@ -177,11 +177,11 @@ export async function getRegistration(req, res) {
       DATE_FORMAT(r.registration_date, '%Y-%m-%d') AS registration_date,
       DATE_FORMAT(r.expiration_date, '%Y-%m-%d') AS expiration_date,
       r.registration_status,
-      v.make,
-      v.model,
-      v.year,
+      v.make AS vehicle_make,
+      v.model AS vehicle_model,
+      v.year AS vehicle_year,
       v.plate_number AS vehicle_plate_number,
-      d.license_number,
+      d.license_number AS owner_license_number,
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS owner_name
     FROM vehicle_registrations r
     JOIN vehicles v ON r.vehicle_plate_number = v.plate_number
@@ -195,7 +195,7 @@ export async function getRegistration(req, res) {
   if (!rows.length) return res.status(404).json({ error: 'Registration not found' })
 
   const registration = mapRowToRegistrationDetails(rows[0])
-
+  
   res.json({ registration })
 }
 

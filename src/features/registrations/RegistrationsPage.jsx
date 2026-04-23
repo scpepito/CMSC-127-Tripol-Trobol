@@ -25,7 +25,7 @@ import {
 import { createRegistration, deleteRegistration, getRegistration, listRegistrations, updateRegistration  } from '../../api/registrations.js'
 import { formatLicenseNumber } from '../../lib/licenseNumber.js'
 import RegistrationForm from './RegistrationForm.jsx'
-import { listRowFromApi } from './registrationMappers.js'
+import { listRowFromApi, toStatusTone } from './registrationMappers.js'
 
 const registrationStatusFilters = [
   { value: '', label: 'All' },
@@ -34,7 +34,7 @@ const registrationStatusFilters = [
   { value: 'Suspended', label: 'Suspended' },
 ]
 
-export default function RegistrationsPage({ onNavigate, openRegistrationNumber }) {
+export default function RegistrationsPage({ onNavigate, openRegistrationNumber, returnTo }) {
   const [view, setView] = useState('list') // list | create | edit | details
   const [selectedRegistrationNumber, setSelectedRegistrationNumber] = useState(null)
 
@@ -93,9 +93,9 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber }
   useEffect(() => {
     if (!openRegistrationNumber) return
     openDetails(openRegistrationNumber).finally(() => {
-      onNavigate?.({ key: 'registrations' })
+      onNavigate?.({ key: 'registrations', returnTo: returnTo ?? null })
     })
-  }, [openRegistrationNumber, openDetails, onNavigate])
+  }, [openRegistrationNumber, openDetails, onNavigate, returnTo])
 
   async function openEdit(regNumber) {
     setError('')
@@ -196,7 +196,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber }
         <div className="flex items-center justify-end gap-2">
           <button
             type="button"
-            onClick={() => openDetails(row.regNumber)}
+            onClick={() => openDetails(row.registrationNumber)}
             className="grid size-9 place-items-center rounded-xl bg-white cursor-pointer disabled:cursor-not-allowed"
             aria-label="View"
             title="View"
@@ -205,7 +205,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber }
           </button>
           <button
             type="button"
-            onClick={() => openEdit(row.regNumber)}
+            onClick={() => openEdit(row.registrationNumber)}
             className="grid size-9 place-items-center rounded-xl bg-white cursor-pointer disabled:cursor-not-allowed "
             aria-label="Edit"
             title="Edit"
@@ -214,7 +214,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber }
           </button>
           <button
             type="button"
-            onClick={() => handleDelete(row.regNumber)}
+            onClick={() => handleDelete(row.registrationNumber)}
             disabled={saving}
             className="grid size-9 place-items-center rounded-xl bg-white cursor-pointer disabled:cursor-not-allowed"
             aria-label="Delete"
@@ -289,8 +289,10 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber }
             leading={
               <button
                 type="button"
-                onClick={() => setView('list')}
-                
+                onClick={() => {
+                  if (returnTo) return onNavigate?.(returnTo)
+                  setView('list')
+                }}
                 /*TODO: update colors*/
                 className="grid size-12 place-items-center rounded-[14px] bg-[#fbf3fd] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
@@ -313,7 +315,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber }
             <RegistrationDetailsHero
               registrationNumber={selectedRegistration.registration_number}
               registrationDate={selectedRegistration.registration_date}
-              expirationDate={selectedRegistration.expiration_ate}
+              expirationDate={selectedRegistration.expiration_date}
               registrationStatus={statusNode}
               vehiclePlate={selectedRegistration.vehicle?.plate_number}
               vehicleSub={`${selectedRegistration.vehicle?.make} ${selectedRegistration.vehicle?.model} (${selectedRegistration.vehicle?.year})`}
@@ -330,7 +332,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber }
                   if (!plateNumber) return
                   onNavigate?.({
                     key: 'vehicles',
-                    vehiclePlateNumber: plateNumber,
+                    plateNumber: plateNumber,
                     returnTo: { key: 'registrations', regNumber: selectedRegistration.registration_number },
                   })
                 }}

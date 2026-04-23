@@ -57,15 +57,12 @@ export default function RegistrationDetailsHero({
           <Field label="Registration Number">
             <div className="text-3xl font-semibold tracking-tight">{registrationNumber}</div>
           </Field>
-          <Field label="Registration Date">{formatLongDate(registrationDate)}</Field>
+          <Field label="Status">{registrationStatus}</Field>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-8 mt-4">
           <Field label="Expiration Date">{formatLongDate(registrationDate)}</Field>
-        </div>
-
-        <div className="space-y-8 mt-26">
-          <Field label="Status">{status}</Field>
+          <Field label="Registration Date">{formatLongDate(registrationDate)}</Field>
         </div>
       </div>
 
@@ -78,7 +75,7 @@ export default function RegistrationDetailsHero({
           {vehicleSub ? <div className="mt-1 text-sm font-medium text-white/75">{vehicleSub}</div> : null}
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-8 mt-4">
           <Field label="Registered Owner">{ownerName}</Field>
           <div className="mt-1 text-sm font-medium text-white/75">{ownerLicense}</div>
         </div>
