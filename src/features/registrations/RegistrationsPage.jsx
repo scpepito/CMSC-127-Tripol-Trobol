@@ -210,7 +210,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
             aria-label="Edit"
             title="Edit"
           >
-            <Pencil className="size-4 text-[#bf68c5]" />
+            <Pencil className="size-4 text-[#E6757D]" />
           </button>
           <button
             type="button"
@@ -238,11 +238,11 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
                 type="button"
                 onClick={() => setView('list')}
                 // TODO: update colors
-                className="grid size-11 place-items-center rounded-[14px] bg-[#fbf3fd] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
+                className="grid size-11 place-items-center rounded-[14px] bg-[#FEF4F4] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
                 title="Back"
               >
-                <ArrowLeft className="size-6 text-[#bf68c5]" />
+                <ArrowLeft className="size-6 text-[#E6757D]" />
               </button>
             }
             title={view === 'create' ? 'Register Vehicle' : 'Edit Vehicle Registration'}
@@ -293,19 +293,17 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
                   if (returnTo) return onNavigate?.(returnTo)
                   setView('list')
                 }}
-                /*TODO: update colors*/
-                className="grid size-12 place-items-center rounded-[14px] bg-[#fbf3fd] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
+                className="grid size-12 place-items-center rounded-[14px] bg-[#FEF4F4] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
                 title="Back"
               >
-                <ArrowLeft className="size-6 text-[#bf68c5]" />
+                <ArrowLeft className="size-6 text-[#E6757D]" />
               </button>
             }
             title="Registration Details"
             subtitle={`${selectedRegistration.registration_number} - ${selectedRegistration.vehicle?.make} ${selectedRegistration.vehicle?.model}`}
             action={
-              // TODO: update colors
-              <Button variant="pink" leftIcon={<Pencil className="size-5" />} onClick={() => openEdit(selectedRegistration.registration_number)}>
+              <Button variant="orange" leftIcon={<Pencil className="size-5" />} onClick={() => openEdit(selectedRegistration.registration_number)}>
                 Edit Vehicle Registration
               </Button>
             }
@@ -323,7 +321,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
               ownerLicense={formatLicenseNumber(selectedRegistration.owner?.license_number ?? '')}
             />
 
-            <SectionCard title="Vehicle Information" accent="pink">
+            <SectionCard title="Vehicle Information" accent="peach">
               <button
                 type="button"
                 disabled={!selectedRegistration.vehicle?.plate_number}
@@ -340,7 +338,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
                 aria-label={selectedRegistration.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
                 title={selectedRegistration.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
               >
-                <div className="grid size-12 place-items-center rounded-2xl bg-[#fbf3fd] text-[#bf68c5] ring-1 ring-[#cf89d4]/40">
+                <div className="grid size-12 place-items-center rounded-2xl bg-[#FEF4F4] text-[#E6757D] ring-1 ring-[#E86668]/40">
                   <CarFront className="size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -353,7 +351,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
               </button>
             </SectionCard>
 
-            <SectionCard title="Owner Information" accent="pink">
+            <SectionCard title="Owner Information" accent="peach">
               <button
                 type="button"
                 disabled={!selectedRegistration.owner?.license_number}
@@ -370,7 +368,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
                 aria-label={selectedRegistration.owner?.license_number ? 'View owner details' : 'Owner not available'}
                 title={selectedRegistration.owner?.license_number ? 'View owner details' : 'Owner not available'}
               >
-                <div className="grid size-12 place-items-center rounded-2xl bg-[#fbf3fd] text-[#bf68c5] ring-1 ring-[#cf89d4]/40">
+                <div className="grid size-12 place-items-center rounded-2xl bg-[#FEF4F4] text-[#E6757D] ring-1 ring-[#E86668]/40">
                   <User className="size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -384,7 +382,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
             </SectionCard>
 
             {/* List of registrations */}
-            <SectionCard title={`Registration History (${0})`}>
+            <SectionCard title={`Registration History (${0})`} accent='peach'>
 
             </SectionCard>
 
@@ -401,13 +399,12 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
           title="Vehicle Registrations"
           subtitle="List, view, edit, and manage vehicle registrations."
           action={
-            <Button variant="pink" leftIcon={<Plus className="size-5" />} onClick={() => setView('create')}>
+            <Button variant="orange" leftIcon={<Plus className="size-5" />} onClick={() => setView('create')}>
               Register Vehicle
             </Button>
           }
         />
-        {/*TODO: update colors*/}
-        <div className="mt-6 rounded-2xl border border-[#cf89d4] bg-[#fbf3fd] p-6 shadow-sm">
+        <div className="mt-6 rounded-2xl border border-[#E86668] bg-[#FEF4F4] p-6 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row">
             <div className="flex-1">
               <SearchInput
@@ -438,8 +435,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 
         <div className="mt-6">
           <DataTable
-            // TODO: update colors
-            theadClassName="bg-[#fbf3fd]"
+            theadClassName="bg-[#fef4f4]"
             columns={columns}
             rows={registrations}
             getRowKey={(row) => row.id}

@@ -76,6 +76,7 @@ CREATE TABLE vehicle_registrations (
   vehicle_plate_number VARCHAR(8) NOT NULL,
   expiration_date DATE NOT NULL,
 	
-CONSTRAINT registration_plate_number_fk
- 	FOREIGN KEY (vehicle_plate_number) REFERENCES VEHICLE(plate_number)
+  CONSTRAINT registration_plate_number_fk
+    FOREIGN KEY (vehicle_plate_number) REFERENCES VEHICLE(plate_number)
+
 );

@@ -1,5 +1,5 @@
 export function toStatusTone(status) {
-  if (status === 'Valid') return 'success'
+  if (status === 'Active') return 'success'
   if (status === 'Expired') return 'danger'
   if (status === 'Suspended') return 'warning'
   return 'neutral'

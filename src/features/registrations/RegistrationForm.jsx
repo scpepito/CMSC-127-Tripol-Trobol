@@ -27,7 +27,7 @@ export default function RegistrationForm({
   const [year, setYear] = useState(() => initialValues?.year ?? '')
   const [color, setColor] = useState(() => initialValues?.color ?? '')
 
-  const [vehicle, setVehicle] = useState([])
+  const [registrations, setRegistrations] = useState([])
 
   useEffect(() => {
     let cancelled = false
