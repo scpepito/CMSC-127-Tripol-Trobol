@@ -83,3 +83,28 @@ CREATE TABLE vehicle_registrations (
     ON UPDATE CASCADE
 
 );
+
+CREATE TABLE violation_fines (
+  violation_type VARCHAR(255) PRIMARY KEY,
+  fine_amount DECIMAL(10,2)
+);
+
+CREATE TABLE traffic_violations (
+  violation_id INT AUTO_INCREMENT PRIMARY KEY,
+  violation_type VARCHAR(255),
+ 	date DATE,
+ 	location VARCHAR(255),
+ 	apprehending_officer VARCHAR(128),
+ 	violation_status VARCHAR(20),
+ 	license_number VARCHAR(11),
+ 	plate_number VARCHAR(7),
+
+	CONSTRAINT traffic_violation_violation_type_fk
+  FOREIGN KEY (violation_type) REFERENCES VIOLATION_FINE(violation_type),
+
+	CONSTRAINT traffic_violation_license_number_fk
+  FOREIGN KEY (license_number) REFERENCES DRIVER(license_number),
+
+	CONSTRAINT traffic_violation_plate_number_fk
+ 	FOREIGN KEY (plate_number) REFERENCES VEHICLE(plate_number)
+);
