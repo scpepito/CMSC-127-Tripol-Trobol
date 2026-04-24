@@ -19,7 +19,7 @@ export default function SectionCard({
       headerBg: 'bg-[#fbf3fd]',
       title: 'text-[#bf68c5]',
     },
-    peach: {
+    orange: {
       border: 'border-[#E6757D]',
       headerBg: 'bg-[#FEF4F4]',
       title: 'text-[#E86668]',

@@ -46,7 +46,7 @@ function mapRowToListRegistration(row) {
 }
 
 // map row to full vehicle details
-function mapRowToRegistrationDetails(row) {
+function mapRowToRegistrationDetails(row, registrations) {
   return {
     registration_number: row.registration_number,
     registration_date: row.registration_date,
@@ -61,7 +61,15 @@ function mapRowToRegistrationDetails(row) {
 			make: row.vehicle_make,
 			model: row.vehicle_model,
 			year: row.vehicle_year,
-    }
+    },
+    registrations: registrations.map((reg) => {
+      return {
+        registration_number: toTrimmed(reg.registration_number),
+        registration_date: toTrimmed(reg.registration_date),
+        registration_status: normalizeRegistrationStatus(toTrimmed(reg.registration_status)),
+        expiration_date: toTrimmed(reg.expiration_date),
+      };
+    })
   }
 }
 
@@ -194,7 +202,28 @@ export async function getRegistration(req, res) {
 
   if (!rows.length) return res.status(404).json({ error: 'Registration not found' })
 
-  const registration = mapRowToRegistrationDetails(rows[0])
+  // select registrations with same license plate
+  const registrations = await query(
+    `
+    SELECT
+      registration_number,
+      DATE_FORMAT(registration_date, '%Y-%m-%d') AS registration_date,
+      DATE_FORMAT(expiration_date, '%Y-%m-%d') AS expiration_date,
+      registration_status
+    FROM vehicle_registrations
+    WHERE vehicle_plate_number = (
+      SELECT vehicle_plate_number
+      FROM vehicle_registrations
+      WHERE registration_number = ?
+      )
+    ORDER BY registration_number DESC
+    `,
+    [registrationNumber],
+  )
+
+  if (!registrations.length) return res.status(404).json({ error: 'Registrations not found' })
+
+  const registration = mapRowToRegistrationDetails(rows[0], registrations)
   
   res.json({ registration })
 }
