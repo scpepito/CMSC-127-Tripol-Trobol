@@ -89,7 +89,6 @@ CREATE TABLE violations (
   violation_id INT PRIMARY KEY NOT NULL,
   violation_type VARCHAR(255),
  	date DATE,
- 	location VARCHAR(255),
  	apprehending_officer VARCHAR(128),
  	violation_status VARCHAR(20),
  	license_number VARCHAR(11),

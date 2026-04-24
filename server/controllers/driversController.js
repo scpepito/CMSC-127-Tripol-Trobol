@@ -1,29 +1,6 @@
 import { query } from '../db/query.js'
+import { normalizeLicenseNumber, normalizeLicenseStatus, normalizeLicenseType } from '../lib/normalizers.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
-
-function normalizeLicenseType(value) {
-  if (typeof value !== 'string') return value
-  const v = value.trim().toLowerCase()
-  if (v === 'professional') return 'Professional'
-  if (v === 'non-professional' || v === 'non professional') return 'Non-Professional'
-  if (v === 'student permit' || v === 'student-permit') return 'Student Permit'
-  return value.trim()
-}
-
-function normalizeLicenseStatus(value) {
-  if (typeof value !== 'string') return value
-  const v = value.trim().toLowerCase()
-  if (v === 'valid') return 'Valid'
-  if (v === 'expired') return 'Expired'
-  if (v === 'suspended') return 'Suspended'
-  if (v === 'revoked') return 'Revoked'
-  return value.trim()
-}
-
-function normalizeLicenseNumber(value) {
-  if (typeof value !== 'string') return value
-  return value.replace(/-/g, '').trim().toUpperCase()
-}
 
 function mapRowToListDriver(row) {
   return {

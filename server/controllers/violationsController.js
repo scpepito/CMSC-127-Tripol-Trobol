@@ -179,9 +179,9 @@ export async function listViolations(req, res) {
     params.push(`%${s}%, %${sPlate}%`, `%${s}%`, `%${s}%`, `%${s}%`, `%${sOwnerLicense}%`)
   }
 
-  // search by registration status
+  // search by violation status
   if (status) {
-    where.push('r.registration_status = ?')
+    where.push('v.violation_status = ?')
     params.push(status)
   }
 
