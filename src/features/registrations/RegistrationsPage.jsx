@@ -281,7 +281,6 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 							<button
 								type="button"
 								onClick={() => setView('list')}
-								// TODO: update colors
 								className="grid size-11 place-items-center rounded-[14px] bg-[#FEF4F4] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
 								aria-label="Back"
 								title="Back"
@@ -294,7 +293,6 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 					/>
 
 					{error ? (
-						// TODO: update colors
 						<div className="mt-6 rounded-[14px] border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
 							{error}
 						</div>
@@ -366,15 +364,16 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 						/>
 
 						<SectionCard title="Vehicle Information" accent="orange">
+							{/*Button does not return to registration page, it goes back to vehicle list*/}
 							<button
 								type="button"
 								disabled={!selectedRegistration.vehicle?.plate_number}
 								onClick={() => {
-									const plateNumber = selectedRegistration.vehicle?.plate_number
-									if (!plateNumber) return
+									const licensePlate = selectedRegistration.vehicle?.plate_number
+									if (!licensePlate) return
 									onNavigate?.({
 										key: 'vehicles',
-										plateNumber: plateNumber,
+										plateNumber: licensePlate,
 										returnTo: { key: 'registrations', regNumber: selectedRegistration.registration_number },
 									})
 								}}
@@ -431,7 +430,6 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 								theadClassName="bg-[#fef4f4]"
 								columns={reg_columns}
 								rows={selectedRegistration.registrations}
-								getRowKey={(reg) => reg.id}
 							/>
 						</SectionCard>
 					</div>

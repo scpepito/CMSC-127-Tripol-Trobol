@@ -12,6 +12,14 @@ function normalizeRegistrationStatus(value) {
   return value.trim()
 }
 
+function isoToday() {
+  const d = new Date()
+  const yyyy = d.getFullYear()
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const dd = String(d.getDate()).padStart(2, '0')
+  return `${yyyy}-${mm}-${dd}`
+}
+
 function normalizeLicenseNumber(value) {
   if (typeof value !== 'string') return value
   return value.replace(/-/g, '').trim().toUpperCase()
@@ -79,7 +87,7 @@ function parseRegistrationPayload(body) {
 		registration_number: toTrimmed(body.registration_number),
 		registration_date: toTrimmed(body.registration_date),
 		registration_status: normalizeRegistrationStatus(toTrimmed(body.registration_status)),
-		vehicle_plate_number: toTrimmed(body.vehicle_plate_number),
+		vehicle_plate_number: normalizePlateNumber(toTrimmed(body.vehicle_plate_number)),
 		expiration_date: toTrimmed(body.expiration_date),
 	}
 }	
@@ -99,7 +107,7 @@ function validateRegistrationPayload(res, payload, { requireRegistrationNumber }
     if (!ok) return badRequest(res, "plate_number must match 'ABC-1234'")
   }
 
-  if (!isNonEmptyString(payload.registration_status)) return badRequest(res, 'registration_type is required')
+  if (!isNonEmptyString(payload.registration_status)) return badRequest(res, 'registration_status is required')
 
   const registrationsStatuses = new Set(['Active', 'Suspended', 'Expired'])
   if (!registrationsStatuses.has(payload.registration_status)) {
@@ -111,11 +119,18 @@ function validateRegistrationPayload(res, payload, { requireRegistrationNumber }
 	
   const issuance = new Date(payload.registration_date)
   const expiration = new Date(payload.expiration_date)
+  const today = new Date(isoToday())
   if (Number.isNaN(issuance.getTime()) || Number.isNaN(expiration.getTime())) {
     return badRequest(res, 'Invalid date values')
   }
   if (issuance > expiration) {
-    return badRequest(res, 'issuance_date must be on/before expiration_date')
+    return badRequest(res, 'registration_date must be on/before expiration_date')
+  }
+  if (payload.registration_status == 'Active' && expiration < today) {
+    return badRequest(res, 'registration cannot be active')
+  }
+  if (payload.registration_status == 'Expired' && expiration > today) {
+    return badRequest(res, 'registration cannot be expired')
   }
 
   return null
@@ -256,7 +271,7 @@ export async function createRegistration(req, res) {
       return res.status(409).json({ error: 'Vehicle registration already exists' })
     }
     if (String(e?.code) === 'ER_NO_REFERENCED_ROW_2') {
-      return badRequest(res, 'vehicle_plate_number does not exist')
+      return badRequest(res, `'vehicle_plate_number does not exist' ${payload.vehicle_plate_number}`)
     }
     if (Number(e?.errno) === 1265) {
       return badRequest(
@@ -282,7 +297,7 @@ export async function updateRegistration(req, res) {
     // sql query
     await query(
       `
-        UPDATE vehicles
+        UPDATE vehicle_registrations
         SET
           registration_status = ?,
           registration_date = ?,
