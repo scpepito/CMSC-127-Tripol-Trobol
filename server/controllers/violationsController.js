@@ -1,38 +1,9 @@
 import { TowerControl } from 'lucide-react'
 import { query } from '../db/query.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
+import { normalizeLicenseNumber, normalizePlateNumber, normalizeViolationStatus } from '../lib/normalizers.js'
 
 // formats and normalizes reg status strings
-function normalizeViolationStatus(value) {
-  if (typeof value !== 'string') return value
-  const v = value.trim().toLowerCase()
-  if (v === 'unpaid') return 'Unpaid'
-  if (v === 'paid') return 'Paid'
-  if (v === 'contested') return 'Contested'
-  return value.trim()
-}
-
-function isoToday() {
-  const d = new Date()
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${yyyy}-${mm}-${dd}`
-}
-
-function normalizeLicenseNumber(value) {
-  if (typeof value !== 'string') return value
-  return value.replace(/-/g, '').trim().toUpperCase()
-}
-
-function normalizePlateNumber(value) {
-  if (typeof value !== 'string') return value
-  const cleaned = value.replace(/\s+/g, '').toUpperCase()
-  if (/^[A-Z]{3}\d{4}$/.test(cleaned)) {
-    return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
-  }
-  return cleaned
-}
 
 // map row to violation details
 function mapRowToListViolation(row) {

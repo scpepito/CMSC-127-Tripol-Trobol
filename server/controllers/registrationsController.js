@@ -1,6 +1,7 @@
 import { TowerControl } from 'lucide-react'
 import { query } from '../db/query.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
+import { normalizeLicenseNumber, normalizePlateNumber, normalizeRegistrationStatus } from '../lib/normalizers.js'
 
 // map row to registration details
 function mapRowToListRegistration(row) {
