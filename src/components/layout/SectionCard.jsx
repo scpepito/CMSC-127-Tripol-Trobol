@@ -23,6 +23,11 @@ export default function SectionCard({
       border: 'border-[#E6757D]',
       headerBg: 'bg-[#FEF4F4]',
       title: 'text-[#E86668]',
+    },
+    green : {
+      border: 'border-[#59C559]',
+      headerBg: 'bg-[#F4FBF4]',
+      title: 'text-[#67CA53]',
     }
   }
   const a = accents[accent] ?? accents.violet

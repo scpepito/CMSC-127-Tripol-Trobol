@@ -9,7 +9,9 @@ const variants = {
   ghost: 'bg-transparent text-slate-700 hover:bg-slate-100',
   orange:
     'bg-[#E6757D] text-white shadow-[0px_10px_15px_0px_rgba(0,0,0,0.1),0px_4px_6px_0px_rgba(0,0,0,0.1)] hover:bg-[#E86668]',
-}
+  green:'bg-[#76BA99] text-white shadow-[0px_10px_15px_0px_rgba(0,0,0,0.1),0px_4px_6px_0px_rgba(0,0,0,0.1)] hover:bg-[#67A385]'
+
+  }
 
 export default function Button({
   variant = 'primary',

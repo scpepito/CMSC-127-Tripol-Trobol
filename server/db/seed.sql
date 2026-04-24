@@ -168,4 +168,20 @@ INSERT INTO vehicle_registrations (
   expiration_date, registration_date
 ) VALUES 
 ('1234567890', 'Active', 'XYZ-5678', '2028-09-06', '2024-09-06'),
-('1234567891', 'Expired', 'ABC-1234', '2025-09-06', '2022-09-06')
+('1234567891', 'Expired', 'ABC-1234', '2025-09-06', '2022-09-06');
+
+INSERT INTO violation_locations(
+  violation_id, street, city, region,
+  province, postal_code
+) VALUES
+('1234567890', '9 J.P. Laurel St.', 'City of Davao', 'Region XI (Davao Region)', 'Davao del Sur', '8000'),
+('1234567891', '123 Mabini St.', 'City of Manila', 'National Capital Region (NCR)', 'Metro Manila', '1000');
+
+INSERT INTO violations(
+  violation_id, violation_type, date, apprehending_officer, 
+  violation_status
+) VALUES
+('1234567890', 'Speeding', '2026-04-25', 'Joe Schmoe', 'Unpaid'),
+('1234567891', 'Illegal U-Turn', '2024-02-06', 'Joe Mamma', 'Paid');
+
+
