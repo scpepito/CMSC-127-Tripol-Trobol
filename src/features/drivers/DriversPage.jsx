@@ -384,7 +384,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
                   setView('list')
                 }}
               >
-                {returnTo ? 'Back to Vehicle' : 'Back to List'}
+                {returnTo ? 'Back' : 'Back to List'}
               </Button>
             </div>
           </div>
@@ -394,7 +394,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
     )
   }
 
-  // drivers list view
+  // drivers search form
   return (
     <AppFrame activeKey="drivers" onNavigate={onNavigate}>
       <div className="p-3">

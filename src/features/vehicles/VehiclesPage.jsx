@@ -31,7 +31,7 @@ const vehicleTypeFilterOptions = [
   { value: 'Public Utility Vehicle', label: 'Public Utility Vehicle' },
 ]
 
-export default function VehiclesPage({ onNavigate, openPlateNumber }) {
+export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) {
   const [view, setView] = useState('list') // list | create | edit | details
   const [selectedPlateNumber, setSelectedPlateNumber] = useState(null)
 
@@ -90,9 +90,9 @@ export default function VehiclesPage({ onNavigate, openPlateNumber }) {
   useEffect(() => {
     if (!openPlateNumber) return
     openDetails(openPlateNumber).finally(() => {
-      onNavigate?.({ key: 'vehicles' })
+      onNavigate?.({ key: 'vehicles', returnTo: returnTo ?? null })
     })
-  }, [openPlateNumber, openDetails, onNavigate])
+  }, [openPlateNumber, openDetails, onNavigate, returnTo])
 
   async function openEdit(plateNumber) {
     setError('')
@@ -260,7 +260,10 @@ export default function VehiclesPage({ onNavigate, openPlateNumber }) {
             leading={
               <button
                 type="button"
-                onClick={() => setView('list')}
+                onClick={() => {
+                  if (returnTo) return onNavigate?.(returnTo)
+                  setView('list')
+                }}
                 className="grid size-12 place-items-center rounded-[14px] bg-[#fbf3fd] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
                 title="Back"
