@@ -1,25 +1,21 @@
 import { TowerControl } from 'lucide-react'
 import { query } from '../db/query.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
-import { normalizeLicenseNumber, normalizePlateNumber, normalizeViolationStatus } from '../lib/normalizers.js'
+import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeViolationStatus } from '../lib/normalizers.js'
 
 // formats and normalizes reg status strings
 
-// map row to violation details
+// map row to violation list
 function mapRowToListViolation(row) {
   return {
     violation_id: row.violation_id,
+    driver_name: row.driver_name,
+    plate_number: row.driver_plate_number,
     violation_type: row.violation_type,
+    violation_date: row.violation_date,
+    apprehending_officer: row.apprehending_officer,
     violation_status: row.violation_status,
-    date: row.date,
     violation_fine: row.violation_fine,
-    driver: {
-            license_number: row.driver_license_number,
-            full_name: row.driver_name,
-    },
-    vehicle: {
-            plate_number: row.vehicle_plate_number,
-    }
   }
 }
 
@@ -28,20 +24,19 @@ function mapRowToViolationDetails(row, violations) {
   return {
     violation_id: row.violation_id,
     violation_type: row.violation_type,
-    violation_status: row.violation_status,
-    apprehending_officer: row.apprehending_officer,
-    date: row.date,
     violation_fine: row.violation_fine,
+    violation_status: row.violation_status,
+    violation_date: row.violation_date,
+    apprehending_officer: row.apprehending_officer,
     location: {
-    street: row.street,
-    city: row.city,
-    region: row.region,
-    province: row.province,
-    postal_code: row.postal_code,
+      street: row.street,
+      city: row.city,
+      region: row.region,
+      province: row.province,
     },
     driver: {
-            license_number: row.driver_license_number,
             full_name: row.driver_name,
+            license_number: row.driver_license_number,
     },
     vehicle: {
             plate_number: row.vehicle_plate_number,
@@ -57,15 +52,16 @@ function parseViolationPayload(body) {
     return {
         violation_id: toTrimmed(body.violation_id),
         violation_type: toTrimmed(body.violation_type),
+        violation_fine: toTrimmed(body.violation_fine),
         violation_status: normalizeViolationStatus(body.violation_status),
+        violation_date: toTrimmed(body.violation_date),
         apprehending_officer: toTrimmed(body.apprehending_officer),
-        date: toTrimmed(body.date),
+
         street: toTrimmed(body.street),
         city: toTrimmed(body.city),
         region: toTrimmed(body.region),
         province: toTrimmed(body.province),
-        postal_code: toTrimmed(body.postal_code),
-        violation_fine: toTrimmed(body.violation_fine),
+
         license_number: normalizeLicenseNumber(body.license_number),
         plate_number: normalizePlateNumber(toTrimmed(body.plate_number)),
     }
@@ -90,14 +86,14 @@ function validateViolationPayload(res, payload, { requireViolationId }) {
         return badRequest(res, 'violation_status must be "Paid", "Unpaid", or "Contested"')
     }
     
-    if (!isIsoDate(payload.date)) return badRequest(res, 'date must be YYYY-MM-DD')
-    const date = new Date(payload.date)
+    if (!isIsoDate(payload.violation_date)) return badRequest(res, 'violation_date must be YYYY-MM-DD')
+    const violation_date = new Date(payload.violation_date)
     const today = new Date(isoToday())
-    if (Number.isNaN(date.getTime())) {
+    if (Number.isNaN(violation_date.getTime())) {
         return badRequest(res, 'Invalid date values')
     }
-    if (date > today) {
-        return badRequest(res, 'date must be on/before today')
+    if (violation_date > today) {
+        return badRequest(res, 'violation_date must be on/before today')
     }
     
     if (!isNonEmptyString(payload.street)) return badRequest(res, 'street is required')
@@ -125,10 +121,7 @@ function validateViolationPayload(res, payload, { requireViolationId }) {
     return null
 }
 
-
-//// I STOPPED CODING HEREEEEEEE
-
-// get and select registrations given parameters
+// get and select violations given parameters
 export async function listViolations(req, res) {
   const search = typeof req.query.search === 'string' ? req.query.search.trim() : ''
   const status = typeof req.query.status === 'string' ? normalizeViolationStatus(req.query.status) : ''
@@ -136,194 +129,191 @@ export async function listViolations(req, res) {
   const where = []
   const params = []
 
+  // search by ticket number, driver, violation type, date, location, or fine amount
   if (search) {
-    // search by ticket number, driver, violation type, date, location, or fine amount
-    const s = search.trim()
+    const s = `%${search.trim()}%`;
+    
     where.push(
-      `(r.registration_number = ? OR
-      v.plate_number LIKE ? OR 
-      v.make LIKE ? OR 
-      v.model LIKE ? OR 
-      CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) LIKE ? OR 
-      d.license_number LIKE ?)`,
-    )
-    params.push(`%${s}%, %${sPlate}%`, `%${s}%`, `%${s}%`, `%${s}%`, `%${sOwnerLicense}%`)
-  }
+      `(v.violation_id LIKE ? OR 
+        v.plate_number LIKE ? OR 
+        v.violation_type LIKE ? OR 
+        CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) LIKE ? OR 
+        d.license_number LIKE ? OR
+        v.apprehending_officer LIKE ?)`
+    );
 
+    params.push(s, s, s, s, s, s);
+  }
   // search by violation status
   if (status) {
     where.push('v.violation_status = ?')
     params.push(status)
   }
 
-  const sql = `
+const sql = `
     SELECT
       v.violation_id,
-      v.violation_type
-      DATE_FORMAT(v.date, '%Y-%m-%d') AS date,
-      v.location,
-      v.apprehending_officer AS apprehending_officer,
+      v.plate_number AS vehicle_plate_number,
+      v.violation_type,
+      DATE_FORMAT(v.violation_date, '%Y-%m-%d') AS violation_date,
+      v.apprehending_officer,
       v.violation_status,
-      v.license_number,
-      v.plate_number,
+      f.fine_amount AS violation_fine,
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS driver_name
     FROM violations v
-    JOIN vehicles v ON r.vehicle_plate_number = v.plate_number
-    JOIN drivers d ON v.owner_license_number = d.license_number
+    JOIN violation_fines f ON v.violation_type = f.violation_type
+    JOIN drivers d ON v.license_number = d.license_number
+    JOIN vehicles veh ON v.plate_number = veh.plate_number
     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
-    ORDER BY r.registration_number ASC
+    ORDER BY v.violation_id DESC
     LIMIT 200
   ` // Set alias here
 
   const rows = await query(sql, params)
   if (!rows.length) return res.status(404).json({ error: 'No violation found' })
-  res.json({ violations: rows.map(mapRowToListViolation) })
+  res.json({ violations: rows.map(mapRowToListViolation) });
 }
 
-// get and select registration given its reg number
-export async function getRegistration(req, res) {
-  const registrationNumber = toTrimmed(req.params.registration_number)
-  
+// get and select violation given its violation id
+export async function getViolation(req, res) {
+  const violationId = toTrimmed(req.params.violation_id);
+
   const rows = await query(
     `
     SELECT
-      r.registration_number,
-      DATE_FORMAT(r.registration_date, '%Y-%m-%d') AS registration_date,
-      DATE_FORMAT(r.expiration_date, '%Y-%m-%d') AS expiration_date,
-      r.registration_status,
-      v.make AS vehicle_make,
-      v.model AS vehicle_model,
-      v.year AS vehicle_year,
-      v.plate_number AS vehicle_plate_number,
-      d.license_number AS owner_license_number,
-      CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS owner_name
-    FROM vehicle_registrations r
-    JOIN vehicles v ON r.vehicle_plate_number = v.plate_number
-    JOIN drivers d ON d.license_number = v.owner_license_number
-    WHERE r.registration_number = ?
+      v.violation_id,
+      v.violation_type,
+      v.violation_status,
+      DATE_FORMAT(v.violation_date, '%Y-%m-%d') AS violation_date,
+      v.apprehending_officer,
+      -- Location Data (from violation_locations)
+      loc.street, loc.city, loc.region, loc.province,
+      -- Fine Data (from violation_fines)
+      f.fine_amount AS violation_fine,
+      -- Driver Data
+      d.license_number AS driver_license_number,
+      CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS driver_name,
+      -- Vehicle Data
+      veh.plate_number AS vehicle_plate_number,
+      veh.make AS vehicle_make,
+      veh.model AS vehicle_model,
+      veh.year AS vehicle_year
+    FROM violations v
+    JOIN violation_fines f ON v.violation_type = f.violation_type
+    JOIN violation_locations loc ON v.violation_id = loc.violation_id
+    JOIN drivers d ON v.license_number = d.license_number
+    JOIN vehicles veh ON v.plate_number = veh.plate_number
+    WHERE v.violation_id = ?
     LIMIT 1
     `,
-    [registrationNumber],
-  )
+    [violationId]
+  );
 
-  if (!rows.length) return res.status(404).json({ error: 'Registration not found' })
-
-  // select registrations with same license plate
-  const registrations = await query(
-    `
-    SELECT
-      registration_number,
-      DATE_FORMAT(registration_date, '%Y-%m-%d') AS registration_date,
-      DATE_FORMAT(expiration_date, '%Y-%m-%d') AS expiration_date,
-      registration_status
-    FROM vehicle_registrations
-    WHERE vehicle_plate_number = (
-      SELECT vehicle_plate_number
-      FROM vehicle_registrations
-      WHERE registration_number = ?
-      )
-    ORDER BY registration_number DESC
-    `,
-    [registrationNumber],
-  )
-
-  if (!registrations.length) return res.status(404).json({ error: 'Registrations not found' })
-
-  const registration = mapRowToRegistrationDetails(rows[0], registrations)
-  
-  res.json({ registration })
+  if (!rows.length) return res.status(404).json({ error: 'Violation not found' });
+  res.json(mapRowToViolationDetails(rows[0]));
 }
 
-// creates and inserts a vehicle registration
-export async function createRegistration(req, res) {
-  const payload = parseRegistrationPayload(req.body)
-  const error = validateRegistrationPayload(res, payload, { requireRegistrationNumber: true })
+// creates and inserts a violation
+export async function createViolation(req, res) {
+  const payload = parseViolationPayload(req.body)
+  const error = validateViolationPayload(res, payload, { requireViolationId: true })
   if (error) return
 
   try {
     await query(
       `
-        INSERT INTO vehicle_registrations (
-          registration_number, registration_status, vehicle_plate_number,
-          expiration_date, registration_date
-        ) VALUES (?, ?, ?, ?, ?)
+        INSERT INTO violations (
+          violation_id, license_number, plate_number, violation_type, violation_date, apprehending_officer, 
+          violation_status
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
       `,
       [
-        payload.registration_number,
-        payload.registration_status,
+        payload.violation_id,
+        payload.driver_license_number,
         payload.vehicle_plate_number,
-        payload.expiration_date,
-        payload.registration_date,
+        payload.violation_type,
+        payload.violation_date,
+        payload.apprehending_officer,
+        payload.violation_status,
       ],
     )
   } catch (e) {
-    if (String(e?.code) === 'ER_DUP_ENTRY') {
-      const msg = String(e?.sqlMessage ?? '').toLowerCase()
-      return res.status(409).json({ error: 'Vehicle registration already exists' })
+    const code = String(e?.code);
+    const msg = String(e?.sqlMessage ?? '').toLowerCase();
+
+    if (code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: 'Violation already exists' });
     }
-    if (String(e?.code) === 'ER_NO_REFERENCED_ROW_2') {
-      return badRequest(res, `'vehicle_plate_number does not exist' ${payload.vehicle_plate_number}`)
+
+    // Handle Foreign Key Failures (Missing Driver, Vehicle, or Fine Type)
+    if (code === 'ER_NO_REFERENCED_ROW_2') {
+      if (msg.includes('plate_number')) {
+        return badRequest(res, `Vehicle plate number does not exist: ${payload.vehicle_plate_number}`);
+      }
+      if (msg.includes('license_number')) {
+        return badRequest(res, `Driver license number does not exist: ${payload.driver_license_number}`);
+      }
+      if (msg.includes('violation_type')) {
+        return badRequest(res, `Violation type '${payload.violation_type}' does not exist in the fines table.`);
+      }
+      return badRequest(res, 'A referenced record (driver, vehicle, or type) was not found.');
     }
+
     if (Number(e?.errno) === 1265) {
       return badRequest(
         res,
-        'Invalid registration_status for current DB schema',
-        'Run server/db/schema.sql or `npm run db:upgrade-enums`.',
-      )
+        'Invalid status or data type for current DB schema',
+        'Check your ENUM values or data formats.',
+      );
     }
-    throw e
-  }
-
+    throw e;
+  }  
   res.status(201).json({ ok: true })
 }
 
-// update vehicle registration
 export async function updateViolation(req, res) {
   const violationId = toTrimmed(req.params.violation_id)
   const payload = parseViolationPayload(req.body)
-  const error = validateRegistrationPayload(res, payload, { requireRegistrationNumber: false })
+  
+  // Use the correct validator for violations
+  const error = validateViolationPayload(res, payload, { requireViolationId: false })
   if (error) return
 
   try {
-    // sql query
-    await query(
+    const result = await query(
       `
-        UPDATE vehicle_registrations
+        UPDATE violations
         SET
-          registration_status = ?,
-          registration_date = ?,
-          vehicle_plate_number = ?,
-          expiration_date = ?
-        WHERE registration_number = ?
+          violation_status = ?,
+          violation_type = ?,
+          license_number = ?,
+          plate_number = ?
+        WHERE violation_id = ?
       `,
       [
-        payload.registration_status,
-        payload.registration_date,
+        payload.violation_status,
+        payload.violation_type,
+        payload.driver_license_number,
         payload.vehicle_plate_number,
-        payload.expiration_date,
-        regNumber
+        violationId // Use the ID from the params
       ],
     )
-  } catch (e) {
-    // FK error
-    if (String(e?.code) === 'ER_NO_REFERENCED_ROW_2') {
-      return badRequest(res, 'vehicle_plate_number does not exist')
+
+    // Check if the row actually existed before trying to return "ok"
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Violation not found' })
     }
-    // status does not exist
-    if (Number(e?.errno) === 1265) {
-      return badRequest(
-        res,
-        'Invalid registration_status for current DB schema',
-        'Run server/db/schema.sql or `npm run db:upgrade-enums`.',
-      )
+
+  } catch (e) {
+    const code = String(e?.code);
+    const msg = String(e?.sqlMessage || '').toLowerCase();
+
+    if (code === 'ER_NO_REFERENCED_ROW_2') {
+      if (msg.includes('license_number')) return badRequest(res, 'Driver license does not exist');
+      if (msg.includes('plate_number')) return badRequest(res, 'Vehicle plate does not exist');
     }
     throw e
   } 
-
-  const exists = await query('SELECT registration_number FROM vehicle_registrations WHERE registration_number = ? LIMIT 1', [
-    payload.registration_number ?? regNumber,
-  ])
-  if (!exists.length) return res.status(404).json({ error: 'Vehicle not found' })
 
   res.json({ ok: true })
 }

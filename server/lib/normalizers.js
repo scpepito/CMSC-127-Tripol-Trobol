@@ -60,7 +60,7 @@ export function normalizeLicenseNumber(value) {
   return value.replace(/-/g, '').trim().toUpperCase()
 }
 
-function isoToday() {
+export function isoToday() {
   const d = new Date()
   const yyyy = d.getFullYear()
   const mm = String(d.getMonth() + 1).padStart(2, '0')

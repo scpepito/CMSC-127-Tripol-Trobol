@@ -18,7 +18,7 @@ export function listRowFromApi(violation) {
     vehicleName: `${violation.vehicle?.make} ${violation.vehicle?.model} • ${violation.vehicle?.year}`.trim(),
     vehicleSub: violation.vehicle?.plate_number,
     driverName: violation.driver?.full_name ?? '',
-    driverLicenseNumber: registration.driver?.license_number ?? '',
+    driverLicenseNumber: violation.driver?.license_number ?? '',
     _raw: violation,
   }
 }

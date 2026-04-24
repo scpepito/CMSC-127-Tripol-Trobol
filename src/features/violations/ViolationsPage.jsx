@@ -17,6 +17,7 @@ import {
   PageHeader,
   SearchInput,
   SectionCard,
+  StatusPill,
   VehicleDetailsHero,
 } from '../../components/index.js'
 import { createViolation, deleteViolation, getViolation, listViolations, updateViolation } from '../../api/violations.js'
@@ -36,7 +37,7 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
   const [selectedViolationId, setSelectedViolationId] = useState(null)
 
   const [search, setSearch] = useState('')
-  const [type, setStatus] = useState('')
+  const [status, setStatus] = useState('')
 
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -48,7 +49,7 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
   const refreshList = useCallback(async () => {
     const rows = await listViolations({ search, status })
     setViolations(rows.map(listRowFromApi))
-  }, [search, type])
+  }, [search, status])
 
   const openDetails = useCallback(async (violationId) => {
     setError('')
@@ -72,7 +73,7 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
       setError('')
       setLoading(true)
       try {
-        const rows = await listViolations({ search, type })
+        const rows = await listViolations({ search, status })
         if (!cancelled) setViolations(rows.map(listRowFromApi))
       } catch (e) {
         if (!cancelled) setError(e.message)
@@ -85,7 +86,7 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
     return () => {
       cancelled = true
     }
-  }, [search, type])
+  }, [search, status])
 
   useEffect(() => {
     if (!openViolationId) return
@@ -381,7 +382,7 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
             <div className="w-full md:w-70">
               <Combobox
                 leftIcon={<Filter className="size-5" />}
-                value={type}
+                value={status}
                 onChange={(v) => setType(v)}
                 options={violationStatusFilters}
                 placeholder="Filter"

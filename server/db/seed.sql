@@ -172,16 +172,22 @@ INSERT INTO vehicle_registrations (
 
 INSERT INTO violation_locations(
   violation_id, street, city, region,
-  province, postal_code
+  province
 ) VALUES
-('1234567890', '9 J.P. Laurel St.', 'City of Davao', 'Region XI (Davao Region)', 'Davao del Sur', '8000'),
-('1234567891', '123 Mabini St.', 'City of Manila', 'National Capital Region (NCR)', 'Metro Manila', '1000');
+('1234567890', '9 J.P. Laurel St.', 'City of Davao', 'Region XI (Davao Region)', 'Davao del Sur'),
+('1234567891', '123 Mabini St.', 'City of Manila', 'National Capital Region (NCR)', 'Metro Manila');
+
+INSERT INTO violation_fines(
+  violation_type, fine_amount
+) VALUES
+('Speeding', '1000'),
+('Illegal U-Turn', '500');
 
 INSERT INTO violations(
-  violation_id, violation_type, date, apprehending_officer, 
+  violation_id, license_number, plate_number, violation_type, violation_date, apprehending_officer, 
   violation_status
 ) VALUES
-('1234567890', 'Speeding', '2026-04-25', 'Joe Schmoe', 'Unpaid'),
-('1234567891', 'Illegal U-Turn', '2024-02-06', 'Joe Mamma', 'Paid');
+('1234567890', 'D0124678901', 'ABC-1234', 'Speeding', '2026-04-25', 'Joe Schmoe', 'Unpaid'),
+('1234567891', 'D0191234567', 'XYZ-5678', 'Illegal U-Turn', '2024-02-06', 'Joe Mamma', 'Paid');
 
 
