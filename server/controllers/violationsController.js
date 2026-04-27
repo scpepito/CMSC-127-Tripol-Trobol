@@ -43,6 +43,7 @@ function mapRowToViolationDetails(row) {
       make: row.vehicle_make,
       model: row.vehicle_model,
       year: row.vehicle_year,
+      type: row.vehicle_type
     }
   };
 }
@@ -196,7 +197,8 @@ export async function getViolation(req, res) {
       veh.plate_number AS vehicle_plate_number,
       veh.make AS vehicle_make,
       veh.model AS vehicle_model,
-      veh.year AS vehicle_year
+      veh.year AS vehicle_year,
+      veh.vehicle_type AS vehicle_type
     FROM violations v
     JOIN violation_fines f ON v.violation_type = f.violation_type
     JOIN violation_locations loc ON v.violation_id = loc.violation_id

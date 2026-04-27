@@ -64,6 +64,8 @@ export default function VehicleForm({
     }))
   }, [drivers])
 
+
+
   async function handleSubmit(e) {
     e.preventDefault()
     await onSubmit?.({
@@ -81,7 +83,7 @@ export default function VehicleForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <SectionCard title="Vehicle Identification" accent="pink">
+      <SectionCard title="Vehicle Identification" accent="green">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField label="Plate Number" required>
             <TextInput
@@ -117,8 +119,8 @@ export default function VehicleForm({
         </div>
       </SectionCard>
 
-      <SectionCard title="Owner Information" accent="pink">
-        <FormField label="Search Owner (Driver)" required>
+      <SectionCard title="Owner Information" accent="green">
+        <FormField label="Search Driver" required>
           <Combobox
             leftIcon={<Search className="size-5" />}
             value={ownerLicenseNumber}
@@ -130,7 +132,8 @@ export default function VehicleForm({
         </FormField>
       </SectionCard>
 
-      <SectionCard title="Vehicle Details" accent="pink">
+
+      <SectionCard title="Vehicle Details" accent="green">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <FormField label="Vehicle Type" required>
             <TextInput
@@ -197,7 +200,7 @@ export default function VehicleForm({
         <Button variant="secondary" onClick={onCancel} disabled={saving}>
           Cancel
         </Button>
-        <Button variant="pink" type="submit" disabled={saving}>
+        <Button variant="green" type="submit" disabled={saving}>
           {submitLabel}
         </Button>
       </div>

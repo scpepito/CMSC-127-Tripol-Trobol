@@ -21,7 +21,8 @@ export default function ViolationDetailsHero({
   date,
   apprehendingOfficer,
   violationFine,
-  location,
+  addressLine1,
+  addressLine2,
   driverName,
   driverLicense,
   vehicleName,
@@ -42,35 +43,73 @@ export default function ViolationDetailsHero({
         <TriangleAlert className="size-7 text-[#3EC191]" />
       </div>
 
-      <div className="grid grid-cols-1 gap-10 pr-20 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-10 pr-20 md:grid-cols-2">
         <div className="space-y-8 mt-4">
           <Field label="Ticket Number">
             <div className="text-3xl font-semibold tracking-tight">{violationId}</div>
           </Field>
-          <Field label="Type">{violationType}</Field>
-        </div>
 
-        <div className="space-y-8">
-          <Field label="Vehicle">
-            <div className='-space-y-1'>
-              <div className="text-2xl font-semibold tracking-tight">{vehicleName}</div>
-              {vehicleSub ? <div className="mt-1 text-sm font-medium text-white/75">{vehicleSub}</div> : null}
-            </div>
+          <Field label="Violation">           
+             <div className="text-2xl font-semibold tracking-tight">{violationType}</div>
           </Field>
-          <Field label="Driver">{driverName}</Field>
+
+
+          <Field label="Violation Date">{date}</Field>
+          <Field label="Addresss">{addressLine1}<br/>{addressLine2}</Field>
+
         </div>
 
-        <div className="space-y-8 mt-26">
-          <Field label="License No.">{driverLicense}</Field>
+        <div className="space-y-8 mt-4">
+          <Field label="Fine Amount">
+            <div className="text-3xl font-semibold tracking-tight">₱{violationFine}</div>
+          </Field>
+
+          {apprehendingOfficer && (
+            <Field label="Apprehending Officer">
+              <div className="text-2xl font-semibold tracking-tight">
+                {apprehendingOfficer}
+              </div>
+            </Field>
+          )}
+
+          <Field label="Status">{violationStatus}</Field>
+
+
         </div>
+
       </div>
 
+
+
       <div className="mt-10 h-px w-full bg-white/25" />
+      
+      <div className="grid grid-cols-1 gap-10 pr-20 md:grid-cols-3">
+        <Field label="Driver" className="mt-6">
+          <div  className="space-y-1">
+              <div className="text-2xl font-semibold tracking-tight">{driverName}</div>
+            <div className="mt-1 text-sm font-medium text-white/75">{driverLicense}</div>
+          </div>
+        </Field>
+
+        <Field label="Vehicle" className="mt-6">
+          <div className='-space-y-1'>
+            <div className="text-2xl font-semibold tracking-tight">{vehicleName}</div>
+            {vehicleSub ? <div className="mt-1 text-sm font-medium text-white/75">{vehicleSub}</div> : null}
+          </div>
+        </Field>
+      </div>
+
+
+      <div className="mt-10 h-px w-full bg-white/25" />
+
+
 
       <div className="mt-6 flex items-center gap-2 text-sm text-white/80">
         <Landmark className="size-4 text-white/70" />
         <span>{footer}</span>
       </div>
+
+
     </section>
   )
 }
