@@ -37,7 +37,7 @@ export default function ViolationDetailsHero({
       )}
     >
       <div className="absolute right-10 top-9 grid size-16 place-items-center rounded-full bg-white shadow-[0px_10px_15px_0px_rgba(0,0,0,0.2),0px_4px_6px_0px_rgba(0,0,0,0.12)]">
-        <Car className="size-7 text-[#b86fc4]" />
+        <TriangleAlert className="size-7 text-[#b86fc4]" />
       </div>
 
       <div className="grid grid-cols-1 gap-10 pr-20 md:grid-cols-3">

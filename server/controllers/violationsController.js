@@ -20,33 +20,31 @@ function mapRowToListViolation(row) {
 }
 
 // map row to full violation details
-function mapRowToViolationDetails(row, violations) {
+function mapRowToViolationDetails(row) {
   return {
     violation_id: row.violation_id,
     violation_type: row.violation_type,
-    violation_fine: row.violation_fine,
     violation_status: row.violation_status,
     violation_date: row.violation_date,
-    apprehending_officer: row.apprehending_officer,
+    violation_fine: row.violation_fine,
     location: {
       street: row.street,
       city: row.city,
-      region: row.region,
       province: row.province,
+      region: row.region
     },
     driver: {
-            full_name: row.driver_name,
-            license_number: row.driver_license_number,
+      full_name: row.driver_name,
+      license_number: row.driver_license_number
     },
     vehicle: {
-            plate_number: row.vehicle_plate_number,
-            make: row.vehicle_make,
-            model: row.vehicle_model,
-            year: row.vehicle_year,
+      plate_number: row.vehicle_plate_number,
+      make: row.vehicle_make,
+      model: row.vehicle_model,
+      year: row.vehicle_year,
     }
-  }
+  };
 }
-
 // parses and trims all fields of body
 function parseViolationPayload(body) {
     return {
@@ -229,8 +227,8 @@ export async function createViolation(req, res) {
       `,
       [
         payload.violation_id,
-        payload.driver_license_number,
-        payload.vehicle_plate_number,
+        payload.license_number,
+        payload.plate_number,
         payload.violation_type,
         payload.violation_date,
         payload.apprehending_officer,

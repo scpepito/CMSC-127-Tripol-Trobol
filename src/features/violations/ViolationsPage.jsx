@@ -17,13 +17,13 @@ import {
   PageHeader,
   SearchInput,
   SectionCard,
-  StatusPill,
-  VehicleDetailsHero,
+  StatusPill
 } from '../../components/index.js'
 import { createViolation, deleteViolation, getViolation, listViolations, updateViolation } from '../../api/violations.js'
 import { formatLicenseNumber } from '../../lib/licenseNumber.js'
 import ViolationForm from './ViolationForm.jsx'
 import { listRowFromApi } from './violationMappers.js'
+import ViolationDetailsHero from '../../components/display/ViolationDetailsHero.jsx'
 
 const violationStatusFilters = [
   { value: '', label: 'All' },
@@ -51,20 +51,22 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
     setViolations(rows.map(listRowFromApi))
   }, [search, status])
 
-  const openDetails = useCallback(async (violationId) => {
-    setError('')
-    setLoading(true)
-    try {
-      const violation = await getViolation(violationId)
-      setSelectedViolation(violation)
-      setSelectedViolationId(violationId)
-      setView('details')
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+const openDetails = useCallback(async (violationId) => {
+  if (!violationId) return; // Guard against empty IDs
+  setError('')
+  setLoading(true)
+  try {
+    const violation = await getViolation(violationId)
+    setSelectedViolation(violation)
+    setSelectedViolationId(violationId)
+    setView('details')
+  } catch (e) {
+    console.error(e)
+    setError(e.message)
+  } finally {
+    setLoading(false)
+  }
+}, [])
 
   useEffect(() => {
     let cancelled = false
@@ -88,12 +90,16 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
     }
   }, [search, status])
 
-  useEffect(() => {
-    if (!openViolationId) return
-    openDetails(openViolationId).finally(() => {
-      onNavigate?.({ key: 'violations', returnTo: returnTo ?? null })
-    })
-  }, [openViolationId, openDetails, onNavigate, returnTo])
+useEffect(() => {
+  if (!openViolationId) return
+
+  async function handleAutoOpen() {
+    await openDetails(openViolationId)
+    onNavigate?.({ key: 'violations', openViolationId: null, returnTo: returnTo ?? null })
+  }
+
+  handleAutoOpen()
+}, [openViolationId, openDetails, onNavigate, returnTo])
 
   async function openEdit(violationId) {
     setError('')
@@ -160,10 +166,9 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
       width: 160,
       render: (row) => <span className="font-medium">{row.violationId}</span>,
     },
-    { key: 'driver', header: 'Driver', width: 220, render: (row) => <span className="text-slate-600">{row.driver}</span> },
+    { key: 'driver', header: 'Driver', width: 220, render: (row) => <span className="text-slate-600">{row.driverName}</span> },
     { key: 'violationType', header: 'Violation', width: 220, render: (row) => <span className="text-slate-600">{row.violationType}</span> },
     { key: 'date', header: 'Date', width: 220, render: (row) => <span className="text-slate-600">{row.date}</span> },
-    { key: 'location', header: 'Location', width: 220, render: (row) => <span className="text-slate-600">{row.location}</span> },
     { key: 'violationFine', header: 'Fine Amount', width: 220, render: (row) => <span className="text-slate-600">{row.violationFine}</span> },
     {
       key: 'status',
@@ -240,7 +245,7 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
           ) : null}
 
           <div className="mt-6">
-            <VehicleForm
+            <ViolationForm
               key={view === 'edit' ? (selectedViolation?.violation_id ?? 'edit') : 'create'}
               initialValues={view === 'edit' ? selectedViolation : null}
               onSubmit={view === 'edit' ? handleUpdate : handleCreate}
@@ -274,9 +279,9 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
               </button>
             }
             title="Violation Details"
-            subtitle={`${selectedViolation.violation_id}`}
+            subtitle={`${selectedViolation.violationId}`}
             action={
-              <Button variant="green" leftIcon={<Pencil className="size-5" />} onClick={() => openEdit(selectedViolation.violation_id)}>
+              <Button variant="green" leftIcon={<Pencil className="size-5" />} onClick={() => openEdit(selectedViolation.violationId)}>
                 Edit Violation
               </Button>
             }
@@ -286,14 +291,13 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
             <ViolationDetailsHero
               violationId={selectedViolation.violation_id}
               violationType={selectedViolation.violation_type}
-              date={selectedViolation.date}
+              date={selectedViolation.violation_date}
               location={selectedViolation.location}
-              violationFine={selectedViolation.violation_type.fine_amount}
+              violationFine={selectedViolation.violation_fine}
               vehicleName={`${selectedViolation.vehicle.make} ${selectedViolation.vehicle.model}`.trim()}
-              vehicleSub={`${selectedViolation.vehicle.year} • ${selectedViolation.vehicle.color}`}
+              vehicleSub={`${selectedViolation.vehicle.year} • ${selectedViolation.vehicle.plate_number}`}
               driverName={selectedViolation.driver?.full_name ?? ''}
-              driveLicense={formatLicenseNumber(selectedViolation.driver?.license_number ?? '')}
-            />
+              driverLicense={formatLicenseNumber(selectedViolation.driver?.license_number ?? '')}            />
 
             <SectionCard title="Vehicle Information" accent="green">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
@@ -308,10 +312,6 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Year</div>
                   <div className="mt-1 font-bold">{selectedViolation.vehicle.year}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Color</div>
-                  <div className="mt-1 font-bold">{selectedViolation.vehicle.color}</div>
                 </div>
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Vehicle Type</div>
@@ -383,7 +383,7 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
               <Combobox
                 leftIcon={<Filter className="size-5" />}
                 value={status}
-                onChange={(v) => setType(v)}
+                onChange={(v) => setStatus(v)}
                 options={violationStatusFilters}
                 placeholder="Filter"
                 searchable={false}
@@ -400,10 +400,10 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
 
         <div className="mt-6">
           <DataTable
-            theadClassName="bg-[#F4FBF5]"
+            theadClassName="!bg-[#f4fbf5]"
             columns={columns}
             rows={violations}
-            getRowKey={(row) => row.id}
+            getRowKey={(row) => row.violationId}
           />
         </div>
 
