@@ -17,27 +17,29 @@ function Field({ label, children, className }) {
 export default function ViolationDetailsHero({
   violationId,
   violationType,
+  violationStatus,
   date,
-  location,
+  apprehendingOfficer,
   violationFine,
-  vehicleName,
-  vehicleSub,
+  location,
   driverName,
   driverLicense,
+  vehicleName,
+  vehicleSub,
   footer = 'Land Transportation Office',
   className,
 }) {
   return (
     <section
       className={cn(
-        'relative overflow-hidden rounded-2xl bg-linear-to-bl from-[#cf89d4] to-[#b86fc4] px-10 py-9 text-white',
-        'shadow-[0px_25px_50px_0px_rgba(0,0,0,0.25)] ring-1 ring-[#b86fc4] border-3 border-[#cf89d4]',
+        'relative overflow-hidden rounded-2xl bg-linear-to-bl from-[#3EC191] to-[#63CAA3] px-10 py-9 text-white',
+        'shadow-[0px_25px_50px_0px_rgba(0,0,0,0.25)] ring-1 ring-[#3EC191] border-3 border-[#3EC191]',
         'transition-all hover:shadow-xl hover:scale-[1.02]',
         className,
       )}
     >
       <div className="absolute right-10 top-9 grid size-16 place-items-center rounded-full bg-white shadow-[0px_10px_15px_0px_rgba(0,0,0,0.2),0px_4px_6px_0px_rgba(0,0,0,0.12)]">
-        <TriangleAlert className="size-7 text-[#b86fc4]" />
+        <TriangleAlert className="size-7 text-[#3EC191]" />
       </div>
 
       <div className="grid grid-cols-1 gap-10 pr-20 md:grid-cols-3">

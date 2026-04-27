@@ -8,6 +8,8 @@ import {
   Pencil,
   Plus,
   Trash2,
+  ClipboardList,
+  CarFront
 } from 'lucide-react'
 import {
   AppFrame,
@@ -201,7 +203,7 @@ useEffect(() => {
             aria-label="Edit"
             title="Edit"
           >
-            <Pencil className="size-4 text-[#bf68c5]" />
+            <Pencil className="size-4 text-[#26BA84]" />
           </button>
           <button
             type="button"
@@ -271,17 +273,17 @@ useEffect(() => {
                   if (returnTo) return onNavigate?.(returnTo)
                   setView('list')
                 }}
-                className="grid size-12 place-items-center rounded-[14px] bg-[#F4FBF5] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
+                className="grid size-12 place-items-center rounded-[14px] bg-[#E4FBF0] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
                 title="Back"
               >
-                <ArrowLeft className="size-6 text-[#bf68c5]" />
+                <ArrowLeft className="size-6 text-[#26BA84]" />
               </button>
             }
             title="Violation Details"
-            subtitle={`${selectedViolation.violationId}`}
+            subtitle={`${selectedViolation.violation_id}`}
             action={
-              <Button variant="green" leftIcon={<Pencil className="size-5" />} onClick={() => openEdit(selectedViolation.violationId)}>
+              <Button variant="green" leftIcon={<Pencil className="size-5" />} onClick={() => openEdit(selectedViolation.violation_id)}>
                 Edit Violation
               </Button>
             }
@@ -291,34 +293,49 @@ useEffect(() => {
             <ViolationDetailsHero
               violationId={selectedViolation.violation_id}
               violationType={selectedViolation.violation_type}
+              violationStatus={selectedViolation.violation_status}
               date={selectedViolation.violation_date}
-              location={selectedViolation.location}
+              apprehendingOfficer={selectedViolation.apprehending_officer}
               violationFine={selectedViolation.violation_fine}
-              vehicleName={`${selectedViolation.vehicle.make} ${selectedViolation.vehicle.model}`.trim()}
-              vehicleSub={`${selectedViolation.vehicle.year} • ${selectedViolation.vehicle.plate_number}`}
+              location={`${selectedViolation.location?.street}, ${selectedViolation.location?.city}, ${selectedViolation.location?.province}, ${selectedViolation.location?.region}`}              
               driverName={selectedViolation.driver?.full_name ?? ''}
-              driverLicense={formatLicenseNumber(selectedViolation.driver?.license_number ?? '')}            />
+              driverLicense={formatLicenseNumber(selectedViolation.driver?.license_number ?? '')}           
+              vehicleName={`${selectedViolation.vehicle?.make ?? ''} ${selectedViolation.vehicle?.model ?? ''}`.trim()}
+              vehicleSub={`${selectedViolation.vehicle?.year ?? ''} • ${selectedViolation.vehicle?.plate_number ?? ''}`}
+            />
 
-            <SectionCard title="Vehicle Information" accent="green">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Plate Number</div>
-                  <div className="mt-1 font-bold">{selectedViolation.violation_id}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Make & Model</div>
-                  <div className="mt-1 font-bold">{`${selectedViolation.vehicle.make} ${selectedViolation.vehicle.model}`.trim()}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Year</div>
-                  <div className="mt-1 font-bold">{selectedViolation.vehicle.year}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Vehicle Type</div>
-                  <div className="mt-1 font-bold">{selectedViolation.vehicle.vehicle_type}</div>
-                </div>
-              </div>
-            </SectionCard>
+
+						<SectionCard title="Vehicle Information" accent="green">
+							<button
+								type="button"
+								disabled={!selectedViolation.vehicle?.plate_number}
+								onClick={() => {
+									const licensePlate = selectedViolation.vehicle?.plate_number
+									if (!licensePlate) return
+									onNavigate?.({
+										key: 'vehicles',
+										plateNumber: licensePlate,
+										returnTo: { key: 'violations', regNumber: selectedViolation.violation_id },
+									})
+								}}
+								className="flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 enabled:cursor-pointer enabled:hover:bg-slate-50 disabled:opacity-60"
+								aria-label={selectedViolation.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
+								title={selectedViolation.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
+							>
+								<div className="grid size-12 place-items-center rounded-2xl bg-[#E4FBF0] text-[#26BA84] ring-1 ring-[#26BA84]/40">
+									<CarFront className="size-5" />
+								</div>
+								<div className="min-w-0 flex-1">
+									<div className="truncate font-semibold">{selectedViolation.vehicle?.plate_number}</div>
+									<div className="mt-0.5 text-sm text-slate-500">
+										{`${selectedViolation.vehicle?.make} ${selectedViolation.vehicle?.model} (${selectedViolation.vehicle?.year})`}
+									</div>
+								</div>
+								<ChevronRight className="size-5 shrink-0 text-slate-400" />
+							</button>
+						</SectionCard>
+
+
 
             <SectionCard title="Driver Information" accent="green">
               <button
@@ -337,7 +354,7 @@ useEffect(() => {
                 aria-label={selectedViolation.driver?.license_number ? 'View driver details' : 'Driver not available'}
                 title={selectedViolation.driver?.license_number ? 'View driver details' : 'Driver not available'}
               >
-                <div className="grid size-12 place-items-center rounded-2xl bg-[#F4FBF5] text-[#bf68c5] ring-1 ring-[#67A385]/40">
+                <div className="grid size-12 place-items-center rounded-2xl bg-[#E4FBF0] text-[#26BA84] ring-1 ring-[#26BA84]/40">
                   <User className="size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
@@ -348,6 +365,11 @@ useEffect(() => {
                 </div>
                 <ChevronRight className="size-5 shrink-0 text-slate-400" />
               </button>
+            </SectionCard>
+
+            <SectionCard title="Location Information" accent="green">
+              <p>{selectedViolation.location?.street}, {selectedViolation.location?.city}</p>
+              <p>{selectedViolation.location?.province}, {selectedViolation.location?.region}</p>
             </SectionCard>
 
           </div>
@@ -369,7 +391,7 @@ useEffect(() => {
           }
         />
 
-        <div className="mt-6 rounded-2xl border border-[#67A385] bg-[#F4FBF5] p-6 shadow-sm">
+        <div className="mt-6 rounded-2xl border border-[#26BA84] bg-[#E4FBF0] p-6 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row">
             <div className="flex-1">
               <SearchInput
@@ -400,7 +422,7 @@ useEffect(() => {
 
         <div className="mt-6">
           <DataTable
-            theadClassName="!bg-[#f4fbf5]"
+            theadClassName="!bg-[#E4FBF0]"
             columns={columns}
             rows={violations}
             getRowKey={(row) => row.violationId}

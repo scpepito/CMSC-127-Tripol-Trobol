@@ -26,6 +26,7 @@ function mapRowToViolationDetails(row) {
     violation_type: row.violation_type,
     violation_status: row.violation_status,
     violation_date: row.violation_date,
+    apprehending_officer: row.apprehending_officer,
     violation_fine: row.violation_fine,
     location: {
       street: row.street,

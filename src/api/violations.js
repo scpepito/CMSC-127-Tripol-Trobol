@@ -11,7 +11,7 @@ export async function listViolations({ search = '', status = '' } = {}) {
 
 export async function getViolation(violationId) {
   const { data } = await apiFetch(`/violations/${encodeURIComponent(violationId)}`)
-  return data.violation
+  return data
 }
 
 export async function createViolation(payload) {
