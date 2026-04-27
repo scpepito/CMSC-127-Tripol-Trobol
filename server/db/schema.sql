@@ -2,14 +2,15 @@ CREATE DATABASE IF NOT EXISTS tripol_trobol;
 USE tripol_trobol;
 
 DROP TABLE IF EXISTS vehicle_violations;
-
 DROP TABLE IF EXISTS vehicle_registrations;
-
 DROP TABLE IF EXISTS vehicles;
 
 DROP TABLE IF EXISTS driver_addresses;
-
 DROP TABLE IF EXISTS drivers;
+
+DROP TABLE IF EXISTS violation_fines;
+DROP TABLE IF EXISTS violations;
+DROP TABLE IF EXISTS violation_locations;
 
 CREATE TABLE drivers (
   -- displayed format: D01-23-456789
@@ -83,3 +84,43 @@ CREATE TABLE vehicle_registrations (
     ON UPDATE CASCADE
 
 );
+
+CREATE TABLE violations (
+  violation_id INT PRIMARY KEY NOT NULL,
+  license_number VARCHAR(11),
+  plate_number VARCHAR(8),
+  violation_type VARCHAR(255),
+ 	violation_date DATE,
+ 	apprehending_officer VARCHAR(128),
+ 	violation_status VARCHAR(20),
+
+	CONSTRAINT violation_violation_type_fk
+  FOREIGN KEY (violation_type) REFERENCES violation_fines(violation_type),
+
+	CONSTRAINT violation_license_number_fk
+  FOREIGN KEY (license_number) REFERENCES driver(license_number),
+
+	CONSTRAINT violation_plate_number_fk
+ 	FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
+);
+
+CREATE TABLE violation_fines (
+  violation_type VARCHAR(255) PRIMARY KEY,
+  fine_amount DECIMAL(10,2)
+);
+
+CREATE TABLE violation_locations(
+  violation_id INT NOT NULL,
+  street VARCHAR(120) NOT NULL,
+  city VARCHAR(80) NOT NULL,
+  region VARCHAR(120) NOT NULL,
+  province VARCHAR(80) NOT NULL,
+  PRIMARY KEY (violation_id),
+ 
+  CONSTRAINT fk_violation_locations_violations
+    FOREIGN KEY (violation_id)
+    REFERENCES violations(violation_id)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
+

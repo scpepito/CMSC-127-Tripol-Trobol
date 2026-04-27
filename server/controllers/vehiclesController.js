@@ -1,28 +1,7 @@
 import { query } from '../db/query.js'
+import { normalizeLicenseNumber, normalizePlateNumber, normalizeVehicleType } from '../lib/normalizers.js'
 import { badRequest, isNonEmptyString, toTrimmed } from '../lib/validators.js'
 
-function normalizePlateNumber(value) {
-  if (typeof value !== 'string') return value
-  const cleaned = value.replace(/\s+/g, '').toUpperCase()
-  if (/^[A-Z]{3}\d{4}$/.test(cleaned)) {
-    return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
-  }
-  return cleaned
-}
-
-function normalizeLicenseNumber(value) {
-  if (typeof value !== 'string') return value
-  return value.replace(/-/g, '').trim().toUpperCase()
-}
-
-function normalizeVehicleType(value) {
-  if (typeof value !== 'string') return value
-  const v = value.trim().toLowerCase()
-  if (v === 'private car') return 'Private Car'
-  if (v === 'motorcycle') return 'Motorcycle'
-  if (v === 'public utility vehicle' || v === 'puv') return 'Public Utility Vehicle'
-  return value.trim()
-}
 
 function mapRowToListVehicle(row) {
   return {

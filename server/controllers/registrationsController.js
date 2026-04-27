@@ -1,38 +1,7 @@
 import { TowerControl } from 'lucide-react'
 import { query } from '../db/query.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
-
-// formats and normalizes reg status strings
-function normalizeRegistrationStatus(value) {
-  if (typeof value !== 'string') return value
-  const v = value.trim().toLowerCase()
-  if (v === 'active') return 'Active'
-  if (v === 'expired') return 'Expired'
-  if (v === 'suspended') return 'Suspended'
-  return value.trim()
-}
-
-function isoToday() {
-  const d = new Date()
-  const yyyy = d.getFullYear()
-  const mm = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  return `${yyyy}-${mm}-${dd}`
-}
-
-function normalizeLicenseNumber(value) {
-  if (typeof value !== 'string') return value
-  return value.replace(/-/g, '').trim().toUpperCase()
-}
-
-function normalizePlateNumber(value) {
-  if (typeof value !== 'string') return value
-  const cleaned = value.replace(/\s+/g, '').toUpperCase()
-  if (/^[A-Z]{3}\d{4}$/.test(cleaned)) {
-    return `${cleaned.slice(0, 3)}-${cleaned.slice(3)}`
-  }
-  return cleaned
-}
+import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeRegistrationStatus } from '../lib/normalizers.js'
 
 // map row to registration details
 function mapRowToListRegistration(row) {

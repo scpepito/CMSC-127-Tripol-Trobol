@@ -1,0 +1,25 @@
+Todo:
+- Redo the vehicles page and recheck mappers to reorder according to how it is defined in schema (**PRIORITY)
+- Finish queries in controllers
+- Fix vehicles page, hero card, which details to show, etc.
+
+- Workflow:
+    - Check schema, what's the order of listing, dapat same sa listing in the table itself tama ba?
+
+    BACKEND:
+    - Study violationsController per function.
+        - Ano yung ililist sa table? Ano yung idedetail? 
+        - Ano itsura ng payload?
+        - Tama ba or valid ba yung entries?
+    - SQL queries
+        - search
+        - filter by status
+        - List all violations
+    - Create, Get, Update, Delete etc.
+
+    FRONTEND:
+    - Remake mappers so that it's 1-1 match
+    - Remake violations page so it only shows the details you wanna show
+    - Fix coloring
+    - Start on violation form
+

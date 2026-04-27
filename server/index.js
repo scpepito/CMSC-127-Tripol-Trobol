@@ -4,6 +4,7 @@ import dotenv from 'dotenv'
 import driversRoutes from './routes/driversRoutes.js'
 import vehiclesRoutes from './routes/vehiclesRoutes.js'
 import registrationsRoutes from './routes/registrationsRoutes.js'
+import violationsRoutes from './routes/violationsRoutes.js'
 
 dotenv.config()
 
@@ -19,6 +20,7 @@ app.use(express.json())
 app.use('/drivers', driversRoutes)
 app.use('/vehicles', vehiclesRoutes)
 app.use('/registrations', registrationsRoutes)
+app.use('/violations', violationsRoutes)
 
 const port = Number(process.env.PORT ?? 3001)
 app.listen(port, () => {

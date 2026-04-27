@@ -3,6 +3,7 @@ import DriversPage from './features/drivers/DriversPage.jsx'
 import VehiclesPage from './features/vehicles/VehiclesPage.jsx'
 import { AppFrame } from './components/index.js'
 import RegistrationsPage from './features/registrations/RegistrationsPage.jsx'
+import ViolationsPage from './features/violations/ViolationsPage.jsx'
 
 function App() {
   const [route, setRoute] = useState({ key: 'drivers' })
@@ -34,6 +35,12 @@ function App() {
   if (route.key === 'registrations') {
     return <RegistrationsPage onNavigate={navigate} openRegistrationNumber={route.regNumber} />
   }
+
+  
+  if (route.key === 'violations') {
+    return <ViolationsPage onNavigate={navigate} openViolationId={route.violationId} />
+  }
+
 
   return (
     <AppFrame activeKey={route.key} onNavigate={navigate}>
