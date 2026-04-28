@@ -25,7 +25,7 @@ export default function VehicleForm({
   onSubmit,
   onCancel,
   saving,
-  submitLabel = 'Save Vehicle',
+  submitLabel = 'Save Changes',
 }) {
   const [plateNumber, setPlateNumber] = useState(() => initialValues?.plate_number ?? '')
   const [engineNumber, setEngineNumber] = useState(() => initialValues?.engine_number ?? '')
