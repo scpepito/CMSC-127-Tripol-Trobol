@@ -60,6 +60,15 @@ export function normalizeLicenseNumber(value) {
   return value.replace(/-/g, '').trim().toUpperCase()
 }
 
+export function normalizeRegistrationNumber(value) {
+  if (typeof value !== 'string') return value
+  const cleaned = value.replace(/\s+/g, '')
+  if (/\d{9}$/.test(cleaned)) {
+    return `${cleaned.slice(0, 8)}-${cleaned.slice(8)}`
+  }
+  return cleaned
+}
+
 export function isoToday() {
   const d = new Date()
   const yyyy = d.getFullYear()

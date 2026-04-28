@@ -90,7 +90,7 @@ export default function RegistrationForm({
               <TextInput
                 value={registrationNumber}
                 onChange={(e) => setRegistrationNumber(e.target.value)}
-                placeholder="11111111111"
+                placeholder="12345678-9"
                 maxLength={11}
                 autoComplete="off"
               />

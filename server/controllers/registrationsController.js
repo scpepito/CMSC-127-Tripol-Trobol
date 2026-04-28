@@ -1,7 +1,7 @@
 import { TowerControl } from 'lucide-react'
 import { query } from '../db/query.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
-import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeRegistrationStatus } from '../lib/normalizers.js'
+import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeRegistrationStatus, normalizeRegistrationNumber } from '../lib/normalizers.js'
 
 // map row to registration details
 function mapRowToListRegistration(row) {
@@ -53,7 +53,7 @@ function mapRowToRegistrationDetails(row, registrations) {
 // parses and trims all fields of body
 function parseRegistrationPayload(body) {
 	return {
-		registration_number: toTrimmed(body.registration_number),
+		registration_number: normalizeRegistrationNumber(toTrimmed(body.registration_number)),
 		registration_date: toTrimmed(body.registration_date),
 		registration_status: normalizeRegistrationStatus(toTrimmed(body.registration_status)),
 		vehicle_plate_number: normalizePlateNumber(toTrimmed(body.vehicle_plate_number)),
@@ -66,10 +66,10 @@ function validateRegistrationPayload(res, payload, { requireRegistrationNumber }
   if (requireRegistrationNumber && !isNonEmptyString(payload.registration_number)) {
     return badRequest(res, 'registration_number is required')
   }
-  // registration number is an 11-digit integer
   if (payload.registration_number) {
-    const ok = /\d{11}$/.test(payload.registration_number)
-    if (!ok) return badRequest(res, "registration_number must match '12345678901'")
+    const ok = /\d{8}-\d$/.test(payload.registration_number)
+        console.log(payload.registration_number)
+    if (!ok) return badRequest(res, "registration_number must match '12345678-0'")
   }
   if (payload.vehicle_plate_number) {
     const ok = /^[A-Z]{3}-\d{4}$/.test(payload.vehicle_plate_number)
@@ -119,7 +119,7 @@ export async function listRegistrations(req, res) {
     const sPlate = normalizePlateNumber(s)
     const sOwnerLicense = normalizeLicenseNumber(s)
     where.push(
-      `(r.registration_number = ? OR
+      `(r.registration_number LIKE ? OR
       v.plate_number LIKE ? OR 
       v.make LIKE ? OR 
       v.model LIKE ? OR 
@@ -178,7 +178,7 @@ export async function getRegistration(req, res) {
     FROM vehicle_registrations r
     JOIN vehicles v ON r.vehicle_plate_number = v.plate_number
     JOIN drivers d ON d.license_number = v.owner_license_number
-    WHERE r.registration_number = ?
+    WHERE r.registration_number LIKE ?
     LIMIT 1
     `,
     [registrationNumber],
@@ -198,7 +198,7 @@ export async function getRegistration(req, res) {
     WHERE vehicle_plate_number = (
       SELECT vehicle_plate_number
       FROM vehicle_registrations
-      WHERE registration_number = ?
+      WHERE registration_number LIKE ?
       )
     ORDER BY registration_number DESC
     `,
@@ -272,7 +272,7 @@ export async function updateRegistration(req, res) {
           registration_date = ?,
           vehicle_plate_number = ?,
           expiration_date = ?
-        WHERE registration_number = ?
+        WHERE registration_number LIKE ?
       `,
       [
         payload.registration_status,
@@ -298,7 +298,7 @@ export async function updateRegistration(req, res) {
     throw e
   } 
 
-  const exists = await query('SELECT registration_number FROM vehicle_registrations WHERE registration_number = ? LIMIT 1', [
+  const exists = await query('SELECT registration_number FROM vehicle_registrations WHERE registration_number LIKE ? LIMIT 1', [
     payload.registration_number ?? regNumber,
   ])
   if (!exists.length) return res.status(404).json({ error: 'Vehicle not found' })
@@ -308,7 +308,7 @@ export async function updateRegistration(req, res) {
 
 export async function deleteRegistration(req, res) {
   const regNumber = toTrimmed(req.params.registration_number)
-  const result = await query('DELETE FROM vehicle_registrations WHERE registration_number = ?', [regNumber])
+  const result = await query('DELETE FROM vehicle_registrations WHERE registration_number LIKE ?', [regNumber])
   if (result.affectedRows === 0) return res.status(404).json({ error: 'Vehicle registration not found' })
   res.status(204).end()
 }
