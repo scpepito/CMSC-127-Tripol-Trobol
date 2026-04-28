@@ -167,8 +167,8 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 			header: 'Vehicle',
 			render: (row) => (
 				<div>
-					<div className="font-medium">{row.vehicleName}</div>
-					<div className="mt-0.5 text-sm text-slate-500">{row.vehicleSub}</div>
+					<div className="font-medium">{row.vehiclePlate}</div>
+					<div className="mt-0.5 text-sm text-slate-500">{row.vehicleName}</div>
 				</div>
 			),
 		},
