@@ -160,7 +160,7 @@ export async function listRegistrations(req, res) {
 
 // get and select registration given its reg number
 export async function getRegistration(req, res) {
-  const registrationNumber = toTrimmed(req.params.registration_number)
+  const registrationNumber = normalizeRegistrationNumber(req.params.registration_number)
   
   const rows = await query(
     `
@@ -200,7 +200,7 @@ export async function getRegistration(req, res) {
       FROM vehicle_registrations
       WHERE registration_number LIKE ?
       )
-    ORDER BY registration_number DESC
+    ORDER BY registration_date DESC
     `,
     [registrationNumber],
   )
@@ -214,6 +214,25 @@ export async function getRegistration(req, res) {
 
 // creates and inserts a vehicle registration
 export async function createRegistration(req, res) {
+  // generate a random registration_number
+  while (1) {
+    // continuously loop until new registration_number
+    let random_reg = normalizeRegistrationNumber(Math.floor(Math.random() * (999999999) + 1).toString());
+    let registration = await query(
+      `
+      SELECT registration_number
+      FROM vehicle_registrations
+      WHERE registration_number LIKE ?
+      `, [random_reg]
+    )
+
+    if (!registration.length) {
+      // unique registration number generated
+      req.body.registration_number = random_reg;
+      break;
+    };
+  }
+
   const payload = parseRegistrationPayload(req.body)
   const error = validateRegistrationPayload(res, payload, { requireRegistrationNumber: true })
   if (error) return
