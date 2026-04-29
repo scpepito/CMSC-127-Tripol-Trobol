@@ -60,7 +60,6 @@ export default function RegistrationForm({
   async function handleSubmit(e) {
     e.preventDefault()
     await onSubmit?.({
-      registration_number: registrationNumber,
       registration_status: registrationStatus,
       registration_date: registrationDate,
       expiration_date: expirationDate,
@@ -86,13 +85,16 @@ export default function RegistrationForm({
       <SectionCard title="Registration Information" accent="orange">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div className="md:col-span-2">
-            <FormField label="Registration Number" required>
+            <FormField label="Registration Number" required
+              hint={initialValues != null ? 'Registration number cannot be changed.' : 'Registration number will be automatically generated.'}
+            >
               <TextInput
                 value={registrationNumber}
                 onChange={(e) => setRegistrationNumber(e.target.value)}
-                placeholder="11111111111"
+                placeholder="********-*"
                 maxLength={11}
                 autoComplete="off"
+                disabled={true}
               />
             </FormField>
           </div>

@@ -71,7 +71,7 @@ CREATE TABLE vehicles (
 );
 
 CREATE TABLE vehicle_registrations (
- 	registration_number INT PRIMARY KEY NOT NULL, -- registration number is an 11-digit integer
+ 	registration_number VARCHAR(10) PRIMARY KEY NOT NULL,
   registration_status ENUM('Active','Expired','Suspended') NOT NULL,
   registration_date DATE NOT NULL,
   vehicle_plate_number VARCHAR(8) NOT NULL,
@@ -82,7 +82,6 @@ CREATE TABLE vehicle_registrations (
     REFERENCES vehicles(plate_number)
     ON DELETE RESTRICT
     ON UPDATE CASCADE
-
 );
 
 CREATE TABLE violations (

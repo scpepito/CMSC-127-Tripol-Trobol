@@ -12,8 +12,8 @@ export function listRowFromApi(registration) {
     expirationDate: registration.expiration_date,
     statusLabel: registration.registration_status,
     statusTone: toStatusTone(registration.registration_status),
-    vehicleName: `${registration.vehicle?.make} ${registration.vehicle?.model} • ${registration.vehicle?.year}`.trim(),
-    vehicleSub: registration.vehicle?.plate_number,
+    vehicleName: `${registration.vehicle?.make} ${registration.vehicle?.model} (${registration.vehicle?.year})`.trim(),
+    vehiclePlate: registration.vehicle?.plate_number,
     ownerName: registration.owner?.full_name ?? '',
     ownerLicenseNumber: registration.owner?.license_number ?? '',
     _raw: registration
