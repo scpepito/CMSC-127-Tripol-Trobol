@@ -10,7 +10,7 @@ function mapRowToListViolation(row) {
   return {
     violation_id: row.violation_id,
     driver_name: row.driver_name,
-    plate_number: row.driver_plate_number,
+    plate_number: row.vehicle_plate_number,
     violation_type: row.violation_type,
     violation_date: row.violation_date,
     apprehending_officer: row.apprehending_officer,
@@ -360,10 +360,25 @@ export async function updateViolation(req, res) {
       [
         payload.violation_status,
         payload.violation_type,
-        payload.driver_license_number,
-        payload.vehicle_plate_number,
+        payload.license_number,
+        payload.plate_number,
         violationId // Use the ID from the params
       ],
+    )
+
+    await query(
+      `
+        UPDATE violation_locations
+        SET street = ?, city = ?, region = ?, province = ?
+        WHERE violation_id = ?
+      `,
+      [
+        payload.street,
+        payload.city,
+        payload.region,
+        payload.province,
+        violationId
+      ]
     )
 
     // Check if the row actually existed before trying to return "ok"

@@ -12,8 +12,8 @@ import { PH_REGION_TO_PROVINCES } from '../../data/ph/region-provinces.js'
 import { PH_PROVINCE_TO_REGION } from '../../data/ph/province-region.js'
 
 const violationStatusOptions = [
-  { value: 'Paid', label: 'Paid' },
   { value: 'Unpaid', label: 'Unpaid' },
+  { value: 'Paid', label: 'Paid' },
   { value: 'Contested', label: 'Contested' },
 ]
 
@@ -66,7 +66,7 @@ export default function ViolationForm({
   const [violationDate, setViolationDate] = useState(() => initialValues?.violation_date ?? '')
   const [violationFine, setViolationFine] = useState(() => initialValues?.violation_fine ?? '')
   const [apprehendingOfficer, setApprehendingOfficer] = useState(() => initialValues?.apprehending_officer ?? '')
-  const [violationStatus, setViolationStatus] = useState(() => initialValues?.violation_status ?? '')
+  const [violationStatus, setViolationStatus] = useState(() => initialValues?.violation_status ?? 'Unpaid')
 
   const [street, setStreet] = useState(() => initialValues?.location?.street ?? '')
   const [city, setCity] = useState(() => initialValues?.location?.city ?? '')
