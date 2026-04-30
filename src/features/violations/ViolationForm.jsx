@@ -152,8 +152,9 @@ export default function ViolationForm({
   const violationTypeOptions = useMemo(() => {
     return (violationTypes ?? []).map((vio) => ({
       value: vio.violation_type,
-      label: `${vio.violation_type} - ₱${vio.fine_amount}`,
+      label: vio.violation_type,
       selectedLabel: vio.violation_type,
+      description: `Fine Amount: ${vio.fine_amount}`,
     }))
   }, [violationTypes])
   
@@ -265,8 +266,8 @@ export default function ViolationForm({
             value={violationType}
             onChange={(v) => setViolationType(v)}
             options={violationTypeOptions}
-            placeholder="Search by violation type of fine amount..."
-            searchPlaceholder="Search by violation type of fine amount..."
+            placeholder="Search by violation type or fine amount..."
+            searchPlaceholder="Search by violation type or fine amount..."
           />
         </FormField>
 
