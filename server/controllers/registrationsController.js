@@ -1,7 +1,7 @@
 import { TowerControl } from 'lucide-react'
 import { query } from '../db/query.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
-import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeRegistrationStatus, normalizeRegistrationNumber } from '../lib/normalizers.js'
+import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeRegistrationStatus, normalizeGenericNumber } from '../lib/normalizers.js'
 
 // map row to registration details
 function mapRowToListRegistration(row) {
@@ -53,7 +53,7 @@ function mapRowToRegistrationDetails(row, registrations) {
 // parses and trims all fields of body
 function parseRegistrationPayload(body) {
 	return {
-		registration_number: normalizeRegistrationNumber(toTrimmed(body.registration_number)),
+		registration_number: normalizeGenericNumber(toTrimmed(body.registration_number)),
 		registration_date: toTrimmed(body.registration_date),
 		registration_status: normalizeRegistrationStatus(toTrimmed(body.registration_status)),
 		vehicle_plate_number: normalizePlateNumber(toTrimmed(body.vehicle_plate_number)),
@@ -160,7 +160,7 @@ export async function listRegistrations(req, res) {
 
 // get and select registration given its reg number
 export async function getRegistration(req, res) {
-  const registrationNumber = normalizeRegistrationNumber(req.params.registration_number)
+  const registrationNumber = normalizeGenericNumber(req.params.registration_number)
   
   const rows = await query(
     `
@@ -217,7 +217,7 @@ export async function createRegistration(req, res) {
   // generate a random registration_number
   while (1) {
     // continuously loop until new registration_number
-    let random_reg = normalizeRegistrationNumber(Math.floor(Math.random() * (999999999) + 1).toString());
+    let random_reg = normalizeGenericNumber(Math.floor(Math.random() * (999999999) + 1).toString());
     let registration = await query(
       `
       SELECT registration_number

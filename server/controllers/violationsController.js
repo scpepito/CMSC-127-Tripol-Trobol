@@ -1,7 +1,7 @@
 import { TowerControl } from 'lucide-react'
 import { query } from '../db/query.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
-import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeViolationStatus } from '../lib/normalizers.js'
+import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeGenericNumber, normalizeViolationStatus } from '../lib/normalizers.js'
 
 // formats and normalizes reg status strings
 
@@ -216,6 +216,24 @@ export async function getViolation(req, res) {
 
 // creates and inserts a violation
 export async function createViolation(req, res) {
+
+  while (1) {
+    // continuously loop until new violation_id
+    let random_id = normalizeGenericNumber(Math.floor(Math.random() * (999999999) + 1).toString());
+    let violation = await query(
+      `
+      SELECT violation_id
+      FROM violations
+      WHERE violation_id LIKE ?
+      `, [random_id]
+    )
+
+    if (!violation.length) {
+      req.body.violation_id = random_id;
+      break;
+    };
+  }
+
   const payload = parseViolationPayload(req.body)
   const error = validateViolationPayload(res, payload, { requireViolationId: true })
   if (error) return
@@ -227,7 +245,7 @@ export async function createViolation(req, res) {
           violation_id, license_number, plate_number, violation_type, violation_date, apprehending_officer, 
           violation_status
         ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `,
+      `, 
       [
         payload.violation_id,
         payload.license_number,
