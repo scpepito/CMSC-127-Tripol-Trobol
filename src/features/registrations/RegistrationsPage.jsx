@@ -99,7 +99,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 
 	async function openEdit(regNumber) {
 		setError('')
-		setLoading(true)
+		setLoading(true)		
 		try {
 			const registration = await getRegistration(regNumber)
 			setSelectedRegistration(registration)
@@ -371,10 +371,14 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 								onClick={() => {
 									const licensePlate = selectedRegistration.vehicle?.plate_number
 									if (!licensePlate) return
+									let returnObject = {
+										key: 'registrations', regNumber: selectedRegistration.registration_number
+									} 
+									console.log(returnObject)
 									onNavigate?.({
 										key: 'vehicles',
 										plateNumber: licensePlate,
-										returnTo: { key: 'registrations', regNumber: selectedRegistration.registration_number },
+										returnTo: returnObject,
 									})
 								}}
 								className="flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 enabled:cursor-pointer enabled:hover:bg-slate-50 disabled:opacity-60"

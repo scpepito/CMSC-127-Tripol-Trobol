@@ -321,6 +321,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
                 <button
                   type="button"
                   onClick={() => {
+                  console.log(returnTo)
                     if (returnTo) return onNavigate?.(returnTo)
                     setView('list')
                   }}
