@@ -219,7 +219,10 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
             leading={
               <button
                 type="button"
-                onClick={() => setView('list')}
+                onClick={() => {
+                  setView('list')
+                  setError('')
+                }}
                 className="grid size-11 place-items-center rounded-[14px] bg-[#fbf3fd] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
                 title="Back"
@@ -228,7 +231,7 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
               </button>
             }
             title={view === 'create' ? 'Add New Vehicle' : 'Edit Vehicle'}
-            subtitle="Register a new vehicle in the system"
+            subtitle={view === 'create' ? "Add a new vehicle in the system" : 'Edit an existing vehicle in the system'}
           />
 
           {error ? (
@@ -244,7 +247,7 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
               onSubmit={view === 'edit' ? handleUpdate : handleCreate}
               onCancel={() => setView('list')}
               saving={saving}
-              submitLabel="Save Vehicle"
+              submitLabel={view ==='create' ? "Save Vehicle" : "Save changes"}
             />
           </div>
         </div>
