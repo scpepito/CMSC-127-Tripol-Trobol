@@ -434,7 +434,7 @@ useEffect(() => {
               <SearchInput
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by ticket number, driver, violation type, date, location, or fine amount..."
+                placeholder="Search by ticket number, driver, violation type, date, or fine amount..."
               />
             </div>
 
