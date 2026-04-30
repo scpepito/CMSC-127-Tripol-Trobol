@@ -336,7 +336,7 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
                   onNavigate?.({
                     key: 'drivers',
                     driverLicenseNumber: licenseNumber,
-                    returnTo: { key: 'vehicles', plateNumber: selectedVehicle.plate_number },
+                    returnTo: { key: 'vehicles', plateNumber: selectedVehicle.plate_number, returnTo: returnTo ?? null },
                   })
                 }}
                 className="flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 enabled:cursor-pointer enabled:hover:bg-slate-50 disabled:opacity-60"
