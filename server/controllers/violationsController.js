@@ -52,7 +52,7 @@ function parseViolationPayload(body) {
     return {
         violation_id: toTrimmed(body.violation_id),
         violation_type: toTrimmed(body.violation_type),
-        violation_fine: toTrimmed(body.violation_fine),
+        violation_fine: Number(body.violation_fine),
         violation_status: normalizeViolationStatus(body.violation_status),
         violation_date: toTrimmed(body.violation_date),
         apprehending_officer: toTrimmed(body.apprehending_officer),
@@ -215,6 +215,38 @@ export async function getViolation(req, res) {
   res.json(mapRowToViolationDetails(rows[0]));
 }
 
+export async function listViolationTypes(req, res) {
+  const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+
+  const params = [];
+  let sql = `
+    SELECT 
+      violation_type, 
+      fine_amount 
+    FROM violation_fines
+  `;
+
+  if (search) {
+    sql += ` WHERE violation_type LIKE ?`;
+    params.push(`%${search}%`);
+  }
+
+  sql += ` ORDER BY violation_type ASC`;
+
+  try {
+    const rows = await query(sql, params);
+    
+    if (!rows.length && search) {
+      return res.status(404).json({ error: 'No matching violation types found' });
+    }
+
+    res.json({ violation_types: rows });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 // creates and inserts a violation
 export async function createViolation(req, res) {
 
@@ -283,10 +315,10 @@ export async function createViolation(req, res) {
     // Handle Foreign Key Failures (Missing Driver, Vehicle, or Fine Type)
     if (code === 'ER_NO_REFERENCED_ROW_2') {
       if (msg.includes('plate_number')) {
-        return badRequest(res, `Vehicle plate number does not exist: ${payload.vehicle_plate_number}`);
+        return badRequest(res, `Vehicle plate number does not exist: ${payload.plate_number}`);
       }
       if (msg.includes('license_number')) {
-        return badRequest(res, `Driver license number does not exist: ${payload.driver_license_number}`);
+        return badRequest(res, `Driver license number does not exist: ${payload.license_number}`);
       }
       if (msg.includes('violation_type')) {
         return badRequest(res, `Violation type '${payload.violation_type}' does not exist in the fines table.`);

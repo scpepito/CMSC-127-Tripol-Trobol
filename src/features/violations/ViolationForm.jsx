@@ -3,6 +3,8 @@ import { MapPin, Search, ShieldCheck, Triangle, TriangleAlert, Calendar, User, C
 import { Button, Combobox, FormField, TextInput, SectionCard, SelectInput } from '../../components/index.js'
 import { listDrivers } from '../../api/drivers.js'
 import { listVehicles } from '../../api/vehicles.js' 
+import { listViolationTypes } from '../../api/violations.js' 
+
 import { formatLicenseNumber } from '../../lib/licenseNumber.js'
 import { PH_CITIES_MUNICIPALITIES } from '../../data/ph/cities-municipalities.js'
 import { PH_REGIONS } from '../../data/ph/regions.js'
@@ -55,6 +57,7 @@ export default function ViolationForm({
 
   const [drivers, setDrivers] = useState([])
   const [vehicles, setVehicles] = useState([])
+  const [violationTypes, setViolationTypes] = useState([])
 
   const [plateNumber, setPlateNumber] = useState(() => initialValues?.vehicle?.plate_number ?? '')
   const [licenseNumber, setLicenseNumber] = useState(() => initialValues?.driver?.license_number ?? '')
@@ -74,13 +77,15 @@ export default function ViolationForm({
     let cancelled = false
     async function loadData() {
       try {
-        const [driverData, vehicleData] = await Promise.all([
+        const [driverData, vehicleData, violationData] = await Promise.all([
           listDrivers(),
-          listVehicles()
+          listVehicles(),
+          listViolationTypes()
         ])
         if (!cancelled) {
           setDrivers(driverData)
           setVehicles(vehicleData)
+          setViolationTypes(violationData)
         }
       } catch (err) {
         console.error("Failed to load form data", err)
@@ -89,6 +94,19 @@ export default function ViolationForm({
     loadData()
     return () => { cancelled = true }
   }, [])
+
+  useEffect(() => {
+  if (!violationType) return
+
+  const selected = violationTypes.find(
+    (v) => v.violation_type === violationType
+  )
+
+  if (selected) {
+    setViolationFine(selected.fine_amount)
+  }
+}, [violationType, violationTypes])
+  
 
   const regionOptions = useMemo(
     () => PH_REGIONS.map((r) => ({ value: r, label: r })),
@@ -130,6 +148,14 @@ export default function ViolationForm({
       description: `Plate Number: ${v.plate_number}`,
     }))
   }, [vehicles])
+
+  const violationTypeOptions = useMemo(() => {
+    return (violationTypes ?? []).map((vio) => ({
+      value: vio.violation_type,
+      label: `${vio.violation_type} - ₱${vio.fine_amount}`,
+      selectedLabel: vio.violation_type,
+    }))
+  }, [violationTypes])
   
   async function handleSubmit(e) {
     e.preventDefault()
@@ -141,7 +167,10 @@ export default function ViolationForm({
       violation_fine: Number(violationFine),
       apprehending_officer: apprehendingOfficer,
       violation_status: violationStatus,
-      location: { street, city, province, region }
+      street,
+      city,
+      province,
+      region
     })
   }
 
@@ -230,33 +259,33 @@ export default function ViolationForm({
       <SectionCard title="Violation Information" icon={<TriangleAlert className="size-4" />} accent="green">
         <div className="md:col-span-2">
 
-          <FormField label="Violation Type" required>
-            <TextInput
-              list="violation_type_suggestions"
-              leftIcon={<TriangleAlert className="size-5" />}
-              value={violationType}
-              onChange={(e) => setViolationType(e.target.value)}
-              placeholder="e.g. Beating the Red Light"
-              maxLength={255}
-              autoComplete="off"
-            />
-            <datalist id="violation_type_suggestions">
-              {violationTypeOptions.map((o) => (
-                <option key={o.value} value={o.value} />
-              ))}
-            </datalist>
-          </FormField>
+         <FormField label="Violation Type" required>
+          <Combobox
+            leftIcon={<Search className="size-5" />}
+            value={violationType}
+            onChange={(v) => setViolationType(v)}
+            options={violationTypeOptions}
+            placeholder="Search by violation type of fine amount..."
+            searchPlaceholder="Search by violation type of fine amount..."
+          />
+        </FormField>
+
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mt-4">
 
-          <FormField label="Violation Fine Amount" required>
+
+            <FormField label="Violation Fine Amount" required
+              hint={'Violation fine amount is automatically calculated according to violation type.'}
+            >
               <TextInput
                 leftIcon={<PhilippinePeso className="size-5" />}
                 value={violationFine}
                 onChange={(e) => setViolationFine(e.target.value)}
+                autoComplete="off"
+                disabled={true}
               />
-          </FormField>
+            </FormField>
 
           <FormField label="Violation Status" required>
               <SelectInput

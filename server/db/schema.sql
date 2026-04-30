@@ -97,10 +97,10 @@ CREATE TABLE violations (
   FOREIGN KEY (violation_type) REFERENCES violation_fines(violation_type),
 
 	CONSTRAINT violation_license_number_fk
-  FOREIGN KEY (license_number) REFERENCES driver(license_number),
+  FOREIGN KEY (license_number) REFERENCES drivers(license_number),
 
 	CONSTRAINT violation_plate_number_fk
- 	FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
+ 	FOREIGN KEY (plate_number) REFERENCES vehicles(plate_number)
 );
 
 CREATE TABLE violation_fines (
