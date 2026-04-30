@@ -29,11 +29,23 @@ function App() {
   }
 
   if (route.key === 'vehicles') {
-    return <VehiclesPage onNavigate={navigate} openPlateNumber={route.plateNumber} />
+    return (
+      <VehiclesPage 
+        onNavigate={navigate} 
+        openPlateNumber={route.plateNumber} 
+        returnTo={route.returnTo ?? null}  
+      />
+    )
   }
 
   if (route.key === 'registrations') {
-    return <RegistrationsPage onNavigate={navigate} openRegistrationNumber={route.regNumber} />
+    return (
+      <RegistrationsPage 
+        onNavigate={navigate} 
+        openRegistrationNumber={route.regNumber}
+        returnTo={route.returnTo ?? null}  
+      />
+    )
   }
 
   

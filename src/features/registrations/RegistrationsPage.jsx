@@ -364,21 +364,16 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 						/>
 
 						<SectionCard title="Vehicle Information" accent="orange">
-							{/*Button does not return to registration page, it goes back to vehicle list*/}
 							<button
 								type="button"
 								disabled={!selectedRegistration.vehicle?.plate_number}
 								onClick={() => {
 									const licensePlate = selectedRegistration.vehicle?.plate_number
 									if (!licensePlate) return
-									let returnObject = {
-										key: 'registrations', regNumber: selectedRegistration.registration_number
-									} 
-									console.log(returnObject)
 									onNavigate?.({
 										key: 'vehicles',
 										plateNumber: licensePlate,
-										returnTo: returnObject,
+										returnTo: { key: 'registrations', regNumber: selectedRegistration.registration_number },
 									})
 								}}
 								className="flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 enabled:cursor-pointer enabled:hover:bg-slate-50 disabled:opacity-60"
