@@ -74,9 +74,10 @@ function validateViolationPayload(res, payload, { requireViolationId }) {
     }
     // violation id is an 11-digit integer
     if (payload.violation_id) {
-        const ok = /\d{11}$/.test(payload.violation_id)
-        if (!ok) return badRequest(res, "violation_id must match '12345678901'")
-    }
+    const ok = /\d{8}-\d$/.test(payload.violation_id)
+        console.log(payload.violation_id)
+    if (!ok) return badRequest(res, "violation_id must match '12345678-0'")
+  }
 
     if (!isNonEmptyString(payload.violation_type)) return badRequest(res, 'violation_type is required')
 
@@ -217,9 +218,13 @@ export async function getViolation(req, res) {
 // creates and inserts a violation
 export async function createViolation(req, res) {
 
-  while (1) {
-    // continuously loop until new violation_id
-    let random_id = normalizeGenericNumber(Math.floor(Math.random() * (999999999) + 1).toString());
+  while (1) {      
+    const baseNumber = Math.floor(Math.random() * 100000000)
+    .toString()
+    .padStart(8, '0');
+    const checkDigit = Math.floor(Math.random() * 10);
+    let random_id = normalizeGenericNumber(`${baseNumber}-${checkDigit}`);
+
     let violation = await query(
       `
       SELECT violation_id
@@ -255,7 +260,18 @@ export async function createViolation(req, res) {
         payload.apprehending_officer,
         payload.violation_status,
       ],
-    )
+    );
+
+    await query(
+      `INSERT INTO violation_locations (
+        violation_id, street, city, region, province
+      ) VALUES (?, ?, ?, ?, ?)`,
+      [
+        payload.violation_id, payload.street, payload.city, 
+        payload.region, payload.province
+      ]
+    );
+
   } catch (e) {
     const code = String(e?.code);
     const msg = String(e?.sqlMessage ?? '').toLowerCase();

@@ -85,7 +85,7 @@ CREATE TABLE vehicle_registrations (
 );
 
 CREATE TABLE violations (
-  violation_id INT PRIMARY KEY NOT NULL,
+  violation_id VARCHAR(10) PRIMARY KEY NOT NULL,
   license_number VARCHAR(11),
   plate_number VARCHAR(8),
   violation_type VARCHAR(255),
@@ -109,7 +109,7 @@ CREATE TABLE violation_fines (
 );
 
 CREATE TABLE violation_locations(
-  violation_id INT NOT NULL,
+  violation_id VARCHAR(10) NULL,
   street VARCHAR(120) NOT NULL,
   city VARCHAR(80) NOT NULL,
   region VARCHAR(120) NOT NULL,

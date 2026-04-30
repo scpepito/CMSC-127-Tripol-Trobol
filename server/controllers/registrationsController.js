@@ -216,8 +216,11 @@ export async function getRegistration(req, res) {
 export async function createRegistration(req, res) {
   // generate a random registration_number
   while (1) {
-    // continuously loop until new registration_number
-    let random_reg = normalizeGenericNumber(Math.floor(Math.random() * (999999999) + 1).toString());
+    const baseNumber = Math.floor(Math.random() * 100000000)
+    .toString()
+    .padStart(8, '0');
+    const checkDigit = Math.floor(Math.random() * 10);
+    let random_reg = normalizeGenericNumber(`${baseNumber}-${checkDigit}`);
     let registration = await query(
       `
       SELECT registration_number
