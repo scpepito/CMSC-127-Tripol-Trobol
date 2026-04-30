@@ -116,6 +116,7 @@ export async function listRegistrations(req, res) {
   if (search) {
     // search by reg number, license plate, owner, and vehicle details
     const s = search.trim()
+    const sRegistry = normalizeGenericNumber(s)
     const sPlate = normalizePlateNumber(s)
     const sOwnerLicense = normalizeLicenseNumber(s)
     where.push(
@@ -126,7 +127,7 @@ export async function listRegistrations(req, res) {
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) LIKE ? OR 
       d.license_number LIKE ?)`,
     )
-    params.push(`%${s}%, %${sPlate}%`, `%${s}%`, `%${s}%`, `%${s}%`, `%${sOwnerLicense}%`)
+    params.push(`%${sRegistry}%`, `%${sPlate}%`, `%${s}%`, `%${s}%`, `%${s}%`, `%${sOwnerLicense}%`)
   }
 
   // search by registration status
@@ -143,13 +144,13 @@ export async function listRegistrations(req, res) {
       v.make AS vehicle_make,
       v.model AS vehicle_model,
       v.year AS vehicle_year,
-      v.plate_number AS vehicle_plate_number,
+      r.vehicle_plate_number AS vehicle_plate_number,
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS owner_name
     FROM vehicle_registrations r
     JOIN vehicles v ON r.vehicle_plate_number = v.plate_number
     JOIN drivers d ON v.owner_license_number = d.license_number
     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
-    ORDER BY r.registration_number ASC
+    ORDER BY r.registration_date ASC
     LIMIT 200
   `
 
