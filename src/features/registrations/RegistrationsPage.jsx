@@ -99,7 +99,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 
 	async function openEdit(regNumber) {
 		setError('')
-		setLoading(true)
+		setLoading(true)		
 		try {
 			const registration = await getRegistration(regNumber)
 			setSelectedRegistration(registration)
@@ -364,7 +364,6 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 						/>
 
 						<SectionCard title="Vehicle Information" accent="orange">
-							{/*Button does not return to registration page, it goes back to vehicle list*/}
 							<button
 								type="button"
 								disabled={!selectedRegistration.vehicle?.plate_number}
