@@ -1,13 +1,29 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Search } from 'lucide-react'
-import { Button, Combobox, FormField, TextInput, SectionCard } from '../../components/index.js'
+import { MapPin, Search, ShieldCheck, Triangle, TriangleAlert, Calendar, User, Car, PhilippinePeso } from 'lucide-react'
+import { Button, Combobox, FormField, TextInput, SectionCard, SelectInput } from '../../components/index.js'
 import { listDrivers } from '../../api/drivers.js'
-import { formatLicenseNumber } from '../../lib/licenseNumber.js'
+import { listVehicles } from '../../api/vehicles.js' 
+import { listViolationTypes } from '../../api/violations.js' 
 
-const vehicleTypeOptions = [
-  { value: 'Private Car', label: 'Private Car' },
-  { value: 'Motorcycle', label: 'Motorcycle' },
-  { value: 'Public Utility Vehicle', label: 'Public Utility Vehicle' },
+import { formatLicenseNumber } from '../../lib/licenseNumber.js'
+import { PH_CITIES_MUNICIPALITIES } from '../../data/ph/cities-municipalities.js'
+import { PH_REGIONS } from '../../data/ph/regions.js'
+import { PH_REGION_TO_PROVINCES } from '../../data/ph/region-provinces.js'
+import { PH_PROVINCE_TO_REGION } from '../../data/ph/province-region.js'
+
+const violationStatusOptions = [
+  { value: 'Unpaid', label: 'Unpaid' },
+  { value: 'Paid', label: 'Paid' },
+  { value: 'Contested', label: 'Contested' },
+]
+
+const violationTypeOptions = [
+  { value: 'Beating the Red Light', label: 'Beating the Red Light' },
+  { value: 'Speeding', label: 'Speeding' },
+  { value: 'Illegal U-Turn', label: 'Illegal U-Turn' },
+  { value: 'Tailgating', label: 'Tailgating' },
+  { value: 'No helmet', label: 'No helmet' },
+  { value: 'Disregarding traffic signs', label: 'Disregarding traffic signs' }
 ]
 
 function normalizePlateInput(value) {
@@ -20,179 +36,293 @@ function normalizePlateInput(value) {
   return `${raw.slice(0, 3)}-${raw.slice(3)}`
 }
 
-export default function VehicleForm({
+export default function ViolationForm({
   initialValues,
   onSubmit,
   onCancel,
   saving,
-  submitLabel = 'Save Vehicle',
+  submitLabel = 'Save Violation',
 }) {
-  const [plateNumber, setPlateNumber] = useState(() => initialValues?.plate_number ?? '')
-  const [engineNumber, setEngineNumber] = useState(() => initialValues?.engine_number ?? '')
-  const [chassisNumber, setChassisNumber] = useState(() => initialValues?.chassis_number ?? '')
-  const [ownerLicenseNumber, setOwnerLicenseNumber] = useState(() => initialValues?.owner?.license_number ?? initialValues?.owner_license_number ?? '')
-  const [vehicleType, setVehicleType] = useState(() => initialValues?.vehicle_type ?? '')
-  const [make, setMake] = useState(() => initialValues?.make ?? '')
-  const [model, setModel] = useState(() => initialValues?.model ?? '')
-  const [year, setYear] = useState(() => initialValues?.year ?? '')
-  const [color, setColor] = useState(() => initialValues?.color ?? '')
+
+  
+// Violation type text entry OR dropdown
+// Violation date (calendar)
+// Violation fine amount
+// Apprehending officer text input
+// Violation status dropdown
+// Address 
+
+// search for license
+// Search for plate number
 
   const [drivers, setDrivers] = useState([])
+  const [vehicles, setVehicles] = useState([])
+  const [violationTypes, setViolationTypes] = useState([])
+
+  const [plateNumber, setPlateNumber] = useState(() => initialValues?.vehicle?.plate_number ?? '')
+  const [licenseNumber, setLicenseNumber] = useState(() => initialValues?.driver?.license_number ?? '')
+
+  const [violationType, setViolationType] = useState(() => initialValues?.violation_type ?? '')
+  const [violationDate, setViolationDate] = useState(() => initialValues?.violation_date ?? '')
+  const [violationFine, setViolationFine] = useState(() => initialValues?.violation_fine ?? '')
+  const [apprehendingOfficer, setApprehendingOfficer] = useState(() => initialValues?.apprehending_officer ?? '')
+  const [violationStatus, setViolationStatus] = useState(() => initialValues?.violation_status ?? 'Unpaid')
+
+  const [street, setStreet] = useState(() => initialValues?.location?.street ?? '')
+  const [city, setCity] = useState(() => initialValues?.location?.city ?? '')
+  const [province, setProvince] = useState(() => initialValues?.location?.province ?? '')
+  const [region, setRegion] = useState(() => initialValues?.location?.region ?? '')
 
   useEffect(() => {
     let cancelled = false
-    async function run() {
+    async function loadData() {
       try {
-        const rows = await listDrivers()
-        if (!cancelled) setDrivers(rows)
-      } catch {
-        if (!cancelled) setDrivers([])
+        const [driverData, vehicleData, violationData] = await Promise.all([
+          listDrivers(),
+          listVehicles(),
+          listViolationTypes()
+        ])
+        if (!cancelled) {
+          setDrivers(driverData)
+          setVehicles(vehicleData)
+          setViolationTypes(violationData)
+        }
+      } catch (err) {
+        console.error("Failed to load form data", err)
       }
     }
-    run()
-    return () => {
-      cancelled = true
-    }
+    loadData()
+    return () => { cancelled = true }
   }, [])
 
+  useEffect(() => {
+  if (!violationType) return
+
+  const selected = violationTypes.find(
+    (v) => v.violation_type === violationType
+  )
+
+  if (selected) {
+    setViolationFine(selected.fine_amount)
+  }
+}, [violationType, violationTypes])
+  
+
+  const regionOptions = useMemo(
+    () => PH_REGIONS.map((r) => ({ value: r, label: r })),
+    [],
+  )
+
+  const provinceOptions = useMemo(
+    () => {
+      if (!region) return []
+      const provinces = PH_REGION_TO_PROVINCES[region] ?? []
+      return provinces.map((p) => ({ value: p, label: p }))
+    },
+    [region],
+  )
+
+  const cityOptions = useMemo(() => {
+    if (!province) return []
+    return PH_CITIES_MUNICIPALITIES
+      .filter((c) => c.province === province)
+      .map((c) => ({ value: c.name, label: c.name }))
+  }, [province])
+
+
+  // Map Drivers for Combobox
   const driverOptions = useMemo(() => {
     return (drivers ?? []).map((d) => ({
       value: d.license_number,
       label: d.full_name,
-      selectedLabel: d.full_name,
       description: `License: ${formatLicenseNumber(d.license_number)}`,
     }))
   }, [drivers])
 
+  // Map Vehicles for Combobox
+  const vehicleOptions = useMemo(() => {
+    return (vehicles ?? []).map((v) => ({
+      value: v.plate_number,
+      label: `${v.make} ${v.model} (${v.year})`,
+      selectedLabel: `${v.make} ${v.model} (${v.year})`,
+      description: `Plate Number: ${v.plate_number}`,
+    }))
+  }, [vehicles])
 
-
+  const violationTypeOptions = useMemo(() => {
+    return (violationTypes ?? []).map((vio) => ({
+      value: vio.violation_type,
+      label: vio.violation_type,
+      selectedLabel: vio.violation_type,
+      description: `Fine Amount: ${vio.fine_amount}`,
+    }))
+  }, [violationTypes])
+  
   async function handleSubmit(e) {
     e.preventDefault()
     await onSubmit?.({
+      license_number: licenseNumber,
       plate_number: plateNumber,
-      engine_number: engineNumber,
-      chassis_number: chassisNumber,
-      owner_license_number: ownerLicenseNumber,
-      vehicle_type: vehicleType,
-      make,
-      model,
-      year: Number(year),
-      color,
+      violation_type: violationType,
+      violation_date: violationDate,
+      violation_fine: Number(violationFine),
+      apprehending_officer: apprehendingOfficer,
+      violation_status: violationStatus,
+      street,
+      city,
+      province,
+      region
     })
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <SectionCard title="Vehicle Identification" accent="green">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <FormField label="Plate Number" required>
-            <TextInput
-              value={plateNumber}
-              onChange={(e) => setPlateNumber(normalizePlateInput(e.target.value))}
-              placeholder="ABC-1234"
-              maxLength={8}
-              autoComplete="off"
-            />
+      
+      <SectionCard title="Driver & Vehicle" icon={<User className="size-4" />} accent="green">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
+
+        <FormField label="Search Driver" required>
+          <Combobox
+            leftIcon={<Search className="size-5" />}
+            value={licenseNumber}
+            onChange={(v) => setLicenseNumber(v)}
+            options={driverOptions}
+            placeholder="Search by name or license number..."
+            searchPlaceholder="Search by name or license number..."
+          />
+        </FormField>
+
+          <FormField label="Search Vehicle" required>
+              <Combobox
+                leftIcon={<Search className="size-5" />}
+                value={plateNumber}
+                onChange={(v) => setPlateNumber(v)}
+                options={vehicleOptions}
+                placeholder="Search by vehicle or plate number..."
+                searchPlaceholder="Search by vehicle or plate number..."
+              />
           </FormField>
 
-          <FormField label="Engine Number" required>
-            <TextInput
-              value={engineNumber}
-              onChange={(e) => setEngineNumber(e.target.value)}
-              placeholder="4G18-AB123456"
-              maxLength={32}
-              autoComplete="off"
-            />
-          </FormField>
 
-          <div className="md:col-span-2">
-            <FormField label="Chassis Number" required>
-              <TextInput
-                value={chassisNumber}
-                onChange={(e) => setChassisNumber(e.target.value)}
-                placeholder="MH8AB5678901234567"
-                maxLength={32}
-                autoComplete="off"
+        </div>
+
+      </SectionCard>
+
+
+      <SectionCard title="Address Information" icon={<MapPin className="size-4" />} accent="green">
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <FormField label="Street Address" required>
+                <TextInput
+                  value={street}
+                  onChange={(e) => setStreet(e.target.value)}
+                  placeholder="Street address"
+                  maxLength={120}
+                />
+              </FormField>
+            </div>
+            <FormField label="Region" required>
+              <Combobox
+                value={region}
+                onChange={(v) => { setRegion(v); setProvince(''); setCity(''); }}
+                options={regionOptions}
+                placeholder="Select a region..."
+              />
+            </FormField>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField label="Province" required>
+              <Combobox
+                value={province}
+                onChange={(v) => { setProvince(v); setCity(''); }}
+                options={provinceOptions}
+                disabled={!region}
+                placeholder={region ? 'Select a province...' : 'Select a region first...'}
+                emptyText={region ? 'No matching province' : 'Select a region first'}
+              />
+            </FormField>
+            <FormField label="City/Municipality" required>
+              <Combobox
+                value={city}
+                onChange={setCity}
+                options={cityOptions}
+                placeholder={province ? 'Select a city/municipality...' : 'Select a province first...'}
+                disabled={!province}
+                emptyText={province ? 'No matching city/municipality' : 'Select a province first'}
               />
             </FormField>
           </div>
         </div>
       </SectionCard>
 
-      <SectionCard title="Owner Information" accent="green">
-        <FormField label="Search Driver" required>
+      <SectionCard title="Violation Information" icon={<TriangleAlert className="size-4" />} accent="green">
+        <div className="md:col-span-2">
+
+         <FormField label="Violation Type" required>
           <Combobox
             leftIcon={<Search className="size-5" />}
-            value={ownerLicenseNumber}
-            onChange={(v) => setOwnerLicenseNumber(v)}
-            options={driverOptions}
-            placeholder="Search by name or license number..."
-            searchPlaceholder="Search by name or license number..."
+            value={violationType}
+            onChange={(v) => setViolationType(v)}
+            options={violationTypeOptions}
+            placeholder="Search by violation type or fine amount..."
+            searchPlaceholder="Search by violation type or fine amount..."
           />
         </FormField>
-      </SectionCard>
+
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 mt-4">
 
 
-      <SectionCard title="Vehicle Details" accent="green">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <FormField label="Vehicle Type" required>
-            <TextInput
-              list="vehicle_type_suggestions"
-              value={vehicleType}
-              onChange={(e) => setVehicleType(e.target.value)}
-              placeholder="e.g. Private Car"
-              maxLength={80}
-              autoComplete="off"
-            />
-            <datalist id="vehicle_type_suggestions">
-              {vehicleTypeOptions.map((o) => (
-                <option key={o.value} value={o.value} />
-              ))}
-            </datalist>
-          </FormField>
-
-          <FormField label="Make" required>
-            <TextInput
-              value={make}
-              onChange={(e) => setMake(e.target.value)}
-              placeholder="Toyota"
-              maxLength={64}
-              autoComplete="off"
-            />
-          </FormField>
-
-          <FormField label="Model" required>
-            <TextInput
-              value={model}
-              onChange={(e) => setModel(e.target.value)}
-              placeholder="Vios"
-              maxLength={64}
-              autoComplete="off"
-            />
-          </FormField>
-
-          <FormField label="Year" required>
-            <TextInput
-              value={year}
-              onChange={(e) => setYear(e.target.value.replace(/[^\d]/g, '').slice(0, 4))}
-              placeholder="2024"
-              inputMode="numeric"
-              maxLength={4}
-              autoComplete="off"
-            />
-          </FormField>
-
-          <div className="md:col-span-2">
-            <FormField label="Color" required>
+            <FormField label="Violation Fine Amount" required
+              hint={'Violation fine amount is automatically calculated according to violation type.'}
+            >
               <TextInput
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                placeholder="White"
-                maxLength={32}
+                leftIcon={<PhilippinePeso className="size-5" />}
+                value={violationFine}
+                onChange={(e) => setViolationFine(e.target.value)}
                 autoComplete="off"
+                disabled={true}
               />
             </FormField>
-          </div>
+
+          <FormField label="Violation Status" required>
+              <SelectInput
+                value={violationStatus}
+                onChange={(e) => setViolationStatus(e.target.value)}
+                aria-label="Violation status"
+              >
+                {violationStatusOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </SelectInput>
+          </FormField>
+
+
+            <FormField label="Violation Date" required>
+              <TextInput
+                leftIcon={<Calendar className="size-5" />}
+                type="date"
+                value={violationDate}
+                onChange={(e) => setViolationDate(e.target.value)}
+              />
+            </FormField>
+
+            <FormField label="Apprehending Officer">
+              <TextInput
+                leftIcon={<ShieldCheck className="size-5" />}
+                value={apprehendingOfficer}
+                onChange={(e) => setApprehendingOfficer(e.target.value)}
+              />
+            </FormField>
+
+
+
+
         </div>
       </SectionCard>
 

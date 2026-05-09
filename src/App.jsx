@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import DashboardPage from './features/dashboard/DashboardPage.jsx'
 import DriversPage from './features/drivers/DriversPage.jsx'
 import VehiclesPage from './features/vehicles/VehiclesPage.jsx'
 import { AppFrame } from './components/index.js'
@@ -6,7 +7,7 @@ import RegistrationsPage from './features/registrations/RegistrationsPage.jsx'
 import ViolationsPage from './features/violations/ViolationsPage.jsx'
 
 function App() {
-  const [route, setRoute] = useState({ key: 'drivers' })
+  const [route, setRoute] = useState({ key: 'dashboard' })
 
   function navigate(next) {
     if (typeof next === 'string') {
@@ -16,6 +17,10 @@ function App() {
     if (next && typeof next === 'object' && typeof next.key === 'string') {
       setRoute(next)
     }
+  }
+
+  if (route.key === 'dashboard') {
+    return <DashboardPage onNavigate={navigate} />
   }
 
   if (route.key === 'drivers') {

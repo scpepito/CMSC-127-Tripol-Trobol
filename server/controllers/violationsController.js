@@ -1,7 +1,7 @@
 import { TowerControl } from 'lucide-react'
 import { query } from '../db/query.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
-import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeViolationStatus } from '../lib/normalizers.js'
+import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeGenericNumber, normalizeViolationStatus } from '../lib/normalizers.js'
 
 // formats and normalizes reg status strings
 
@@ -10,7 +10,7 @@ function mapRowToListViolation(row) {
   return {
     violation_id: row.violation_id,
     driver_name: row.driver_name,
-    plate_number: row.driver_plate_number,
+    plate_number: row.vehicle_plate_number,
     violation_type: row.violation_type,
     violation_date: row.violation_date,
     apprehending_officer: row.apprehending_officer,
@@ -52,7 +52,7 @@ function parseViolationPayload(body) {
     return {
         violation_id: toTrimmed(body.violation_id),
         violation_type: toTrimmed(body.violation_type),
-        violation_fine: toTrimmed(body.violation_fine),
+        violation_fine: Number(body.violation_fine),
         violation_status: normalizeViolationStatus(body.violation_status),
         violation_date: toTrimmed(body.violation_date),
         apprehending_officer: toTrimmed(body.apprehending_officer),
@@ -74,9 +74,10 @@ function validateViolationPayload(res, payload, { requireViolationId }) {
     }
     // violation id is an 11-digit integer
     if (payload.violation_id) {
-        const ok = /\d{11}$/.test(payload.violation_id)
-        if (!ok) return badRequest(res, "violation_id must match '12345678901'")
-    }
+    const ok = /\d{8}-\d$/.test(payload.violation_id)
+        console.log(payload.violation_id)
+    if (!ok) return badRequest(res, "violation_id must match '12345678-0'")
+  }
 
     if (!isNonEmptyString(payload.violation_type)) return badRequest(res, 'violation_type is required')
 
@@ -214,8 +215,62 @@ export async function getViolation(req, res) {
   res.json(mapRowToViolationDetails(rows[0]));
 }
 
+export async function listViolationTypes(req, res) {
+  const search = typeof req.query.search === 'string' ? req.query.search.trim() : '';
+
+  const params = [];
+  let sql = `
+    SELECT 
+      violation_type, 
+      fine_amount 
+    FROM violation_fines
+  `;
+
+  if (search) {
+    sql += ` WHERE violation_type LIKE ?`;
+    params.push(`%${search}%`);
+  }
+
+  sql += ` ORDER BY violation_type ASC`;
+
+  try {
+    const rows = await query(sql, params);
+    
+    if (!rows.length && search) {
+      return res.status(404).json({ error: 'No matching violation types found' });
+    }
+
+    res.json({ violation_types: rows });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 // creates and inserts a violation
 export async function createViolation(req, res) {
+
+  while (1) {      
+    const baseNumber = Math.floor(Math.random() * 100000000)
+    .toString()
+    .padStart(8, '0');
+    const checkDigit = Math.floor(Math.random() * 10);
+    let random_id = normalizeGenericNumber(`${baseNumber}-${checkDigit}`);
+
+    let violation = await query(
+      `
+      SELECT violation_id
+      FROM violations
+      WHERE violation_id LIKE ?
+      `, [random_id]
+    )
+
+    if (!violation.length) {
+      req.body.violation_id = random_id;
+      break;
+    };
+  }
+
   const payload = parseViolationPayload(req.body)
   const error = validateViolationPayload(res, payload, { requireViolationId: true })
   if (error) return
@@ -227,7 +282,7 @@ export async function createViolation(req, res) {
           violation_id, license_number, plate_number, violation_type, violation_date, apprehending_officer, 
           violation_status
         ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `,
+      `, 
       [
         payload.violation_id,
         payload.license_number,
@@ -237,7 +292,18 @@ export async function createViolation(req, res) {
         payload.apprehending_officer,
         payload.violation_status,
       ],
-    )
+    );
+
+    await query(
+      `INSERT INTO violation_locations (
+        violation_id, street, city, region, province
+      ) VALUES (?, ?, ?, ?, ?)`,
+      [
+        payload.violation_id, payload.street, payload.city, 
+        payload.region, payload.province
+      ]
+    );
+
   } catch (e) {
     const code = String(e?.code);
     const msg = String(e?.sqlMessage ?? '').toLowerCase();
@@ -249,10 +315,10 @@ export async function createViolation(req, res) {
     // Handle Foreign Key Failures (Missing Driver, Vehicle, or Fine Type)
     if (code === 'ER_NO_REFERENCED_ROW_2') {
       if (msg.includes('plate_number')) {
-        return badRequest(res, `Vehicle plate number does not exist: ${payload.vehicle_plate_number}`);
+        return badRequest(res, `Vehicle plate number does not exist: ${payload.plate_number}`);
       }
       if (msg.includes('license_number')) {
-        return badRequest(res, `Driver license number does not exist: ${payload.driver_license_number}`);
+        return badRequest(res, `Driver license number does not exist: ${payload.license_number}`);
       }
       if (msg.includes('violation_type')) {
         return badRequest(res, `Violation type '${payload.violation_type}' does not exist in the fines table.`);
@@ -294,10 +360,25 @@ export async function updateViolation(req, res) {
       [
         payload.violation_status,
         payload.violation_type,
-        payload.driver_license_number,
-        payload.vehicle_plate_number,
+        payload.license_number,
+        payload.plate_number,
         violationId // Use the ID from the params
       ],
+    )
+
+    await query(
+      `
+        UPDATE violation_locations
+        SET street = ?, city = ?, region = ?, province = ?
+        WHERE violation_id = ?
+      `,
+      [
+        payload.street,
+        payload.city,
+        payload.region,
+        payload.province,
+        violationId
+      ]
     )
 
     // Check if the row actually existed before trying to return "ok"

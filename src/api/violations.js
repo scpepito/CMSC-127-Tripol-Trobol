@@ -9,6 +9,17 @@ export async function listViolations({ search = '', status = '' } = {}) {
   return data.violations
 }
 
+export async function listViolationTypes({ search = '' } = {}) {
+  const params = new URLSearchParams()
+  if (search) params.set('search', search)
+  const qs = params.toString()
+
+  const { data } = await apiFetch(
+    `/violations/violation-types${qs ? `?${qs}` : ''}`
+  )
+  return data.violation_types
+}
+
 export async function getViolation(violationId) {
   const { data } = await apiFetch(`/violations/${encodeURIComponent(violationId)}`)
   return data

@@ -85,7 +85,7 @@ CREATE TABLE vehicle_registrations (
 );
 
 CREATE TABLE violations (
-  violation_id INT PRIMARY KEY NOT NULL,
+  violation_id VARCHAR(10) PRIMARY KEY NOT NULL,
   license_number VARCHAR(11),
   plate_number VARCHAR(8),
   violation_type VARCHAR(255),
@@ -97,10 +97,10 @@ CREATE TABLE violations (
   FOREIGN KEY (violation_type) REFERENCES violation_fines(violation_type),
 
 	CONSTRAINT violation_license_number_fk
-  FOREIGN KEY (license_number) REFERENCES driver(license_number),
+  FOREIGN KEY (license_number) REFERENCES drivers(license_number),
 
 	CONSTRAINT violation_plate_number_fk
- 	FOREIGN KEY (plate_number) REFERENCES vehicle(plate_number)
+ 	FOREIGN KEY (plate_number) REFERENCES vehicles(plate_number)
 );
 
 CREATE TABLE violation_fines (
@@ -109,7 +109,7 @@ CREATE TABLE violation_fines (
 );
 
 CREATE TABLE violation_locations(
-  violation_id INT NOT NULL,
+  violation_id VARCHAR(10) NULL,
   street VARCHAR(120) NOT NULL,
   city VARCHAR(80) NOT NULL,
   region VARCHAR(120) NOT NULL,

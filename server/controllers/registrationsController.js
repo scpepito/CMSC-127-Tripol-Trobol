@@ -1,7 +1,7 @@
 import { TowerControl } from 'lucide-react'
 import { query } from '../db/query.js'
 import { badRequest, isIsoDate, isNonEmptyString, toTrimmed } from '../lib/validators.js'
-import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeRegistrationStatus, normalizeRegistrationNumber } from '../lib/normalizers.js'
+import { isoToday, normalizeLicenseNumber, normalizePlateNumber, normalizeRegistrationStatus, normalizeGenericNumber } from '../lib/normalizers.js'
 
 // map row to registration details
 function mapRowToListRegistration(row) {
@@ -53,7 +53,7 @@ function mapRowToRegistrationDetails(row, registrations) {
 // parses and trims all fields of body
 function parseRegistrationPayload(body) {
 	return {
-		registration_number: normalizeRegistrationNumber(toTrimmed(body.registration_number)),
+		registration_number: normalizeGenericNumber(toTrimmed(body.registration_number)),
 		registration_date: toTrimmed(body.registration_date),
 		registration_status: normalizeRegistrationStatus(toTrimmed(body.registration_status)),
 		vehicle_plate_number: normalizePlateNumber(toTrimmed(body.vehicle_plate_number)),
@@ -116,6 +116,7 @@ export async function listRegistrations(req, res) {
   if (search) {
     // search by reg number, license plate, owner, and vehicle details
     const s = search.trim()
+    const sRegistry = normalizeGenericNumber(s)
     const sPlate = normalizePlateNumber(s)
     const sOwnerLicense = normalizeLicenseNumber(s)
     where.push(
@@ -126,7 +127,7 @@ export async function listRegistrations(req, res) {
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) LIKE ? OR 
       d.license_number LIKE ?)`,
     )
-    params.push(`%${s}%, %${sPlate}%`, `%${s}%`, `%${s}%`, `%${s}%`, `%${sOwnerLicense}%`)
+    params.push(`%${sRegistry}%`, `%${sPlate}%`, `%${s}%`, `%${s}%`, `%${s}%`, `%${sOwnerLicense}%`)
   }
 
   // search by registration status
@@ -143,13 +144,13 @@ export async function listRegistrations(req, res) {
       v.make AS vehicle_make,
       v.model AS vehicle_model,
       v.year AS vehicle_year,
-      v.plate_number AS vehicle_plate_number,
+      r.vehicle_plate_number AS vehicle_plate_number,
       CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS owner_name
     FROM vehicle_registrations r
     JOIN vehicles v ON r.vehicle_plate_number = v.plate_number
     JOIN drivers d ON v.owner_license_number = d.license_number
     ${where.length ? `WHERE ${where.join(' AND ')}` : ''}
-    ORDER BY r.registration_number ASC
+    ORDER BY r.registration_date ASC
     LIMIT 200
   `
 
@@ -160,7 +161,7 @@ export async function listRegistrations(req, res) {
 
 // get and select registration given its reg number
 export async function getRegistration(req, res) {
-  const registrationNumber = normalizeRegistrationNumber(req.params.registration_number)
+  const registrationNumber = normalizeGenericNumber(req.params.registration_number)
   
   const rows = await query(
     `
@@ -216,8 +217,11 @@ export async function getRegistration(req, res) {
 export async function createRegistration(req, res) {
   // generate a random registration_number
   while (1) {
-    // continuously loop until new registration_number
-    let random_reg = normalizeRegistrationNumber(Math.floor(Math.random() * (999999999) + 1).toString());
+    const baseNumber = Math.floor(Math.random() * 100000000)
+    .toString()
+    .padStart(8, '0');
+    const checkDigit = Math.floor(Math.random() * 10);
+    let random_reg = normalizeGenericNumber(`${baseNumber}-${checkDigit}`);
     let registration = await query(
       `
       SELECT registration_number

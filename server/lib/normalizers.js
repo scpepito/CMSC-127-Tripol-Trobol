@@ -60,7 +60,7 @@ export function normalizeLicenseNumber(value) {
   return value.replace(/-/g, '').trim().toUpperCase()
 }
 
-export function normalizeRegistrationNumber(value) {
+export function normalizeGenericNumber(value) {
   if (typeof value !== 'string') return value
   const cleaned = value.replace(/\s+/g, '')
   if (/\d{9}$/.test(cleaned)) {

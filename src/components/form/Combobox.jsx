@@ -33,7 +33,13 @@ export default function Combobox({
     return (options ?? []).filter((o) => {
       const label = String(o.label ?? '').toLowerCase()
       const val = String(o.value ?? '').toLowerCase()
-      return label.includes(q) || val.includes(q)
+      const desc = String(o.description ?? '').toLowerCase()
+
+      return (
+        label.includes(q) ||
+        val.includes(q) ||
+        desc.includes(q)
+      )
     })
   }, [options, query, searchable])
 
