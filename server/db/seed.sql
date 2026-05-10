@@ -223,7 +223,7 @@ INSERT INTO vehicle_registrations (
 ('82736451-9', 'Expired', 'WEO-4971', '2001-12-10', '1998-12-10'),
 ('55610293-8', 'Expired', 'WLK-4399', '2003-05-01', '2000-05-01'),
 ('71625344-9', 'Expired', 'XIN-3086', '2000-12-31', '1997-12-31'),
-('10293841-7', 'Expired', 'XYZ-5678', '2024-09-06', '2021-09-06'),
+('10293841-7', 'Expired', 'XYZ-5678', '2024-09-06', '2022-09-06'),
 ('12345678-0', 'Active', 'XYZ-5678', '2028-09-06', '2024-09-06'),
 ('82731049-5', 'Active', 'YKM-7959', '2029-05-15', '2026-02-15'),
 ('33948571-4', 'Active', 'YTV-0541', '2028-10-12', '2025-10-12'),
@@ -237,15 +237,59 @@ INSERT INTO violation_locations(
 ('12345679-1', '123 Mabini St.', 'City of Manila', 'National Capital Region (NCR)', 'Metro Manila'),
 ('12345679-2', '4482 Carioca Alley', 'Makati', 'National Capital Region (NCR)', 'Metro Manila');
 
-INSERT INTO violation_fines(
+INSERT INTO violation_fines (
   violation_type, fine_amount
 ) VALUES
+('Beating the Red Light', '1500'),
+('Illegal Parking', '1000'),
+('Reckless Driving', '5000'),
+('Driving Under the Influence (DUI)', '20000'),
+('Driving without a Valid License', '3000'),
+('Driving with an Expired License', '2000'),
+('Counter-flowing', '2500'),
+('Excessive Speeding', '3000'),
+('Disregarding Traffic Signs', '1000'),
+('Obstruction of Traffic', '1000'),
+('Modified Muffler (Noise Pollution)', '5000'),
+('Defective Headlights', '1000'),
+('Defective Tail Lights', '1000'),
+('No Side Mirrors', '1000'),
+('Expired Vehicle Registration', '10000'),
+('Using a Fake Driver License', '25000'),
+('Fleeing or Attempting to Elude a Peace Officer', '15000'),
+('Unreadable or Dirty Plate Number', '1000'),
+('Driving on the Sidewalk', '2500'),
+('Obstructing a Pedestrian Lane', '1000'),
+('Failure to Yield to Emergency Vehicle', '2500'),
+('Improper Overtaking', '1000'),
+('Leaving Scene of Accident (Hit and Run)', '20000'),
 ('Smoke Belching', '2000'),
-('Illegal Turn', '1000'),
-('Beating the Red Light', '1000'),
+('Illegal U-Turn', '1000'),
+('Using Mobile Phone while Driving', '5000'),
+('Driving Against the Flow of Traffic', '2500'),
+('Blocking an Intersection (Yellow Box)', '1000'),
+('Driving Under the Influence of Drugs', '25000'),
+('Illegal Use of Blinkers or Sirens', '5000'),
+('Speeding in a School Zone', '3000'),
+('Failure to Give Signal when Turning', '1000'),
+('Driving with a Flat Tire', '1000'),
+('Driving with an Unsecured Hatch or Door', '1500'),
+('Littering from a Vehicle', '500'),
+('No Rear View Mirror', '1000'),
+('Unnecessary Use of High-Beam Lights', '1000'),
+('Driving in a Restricted Area (No Entry)', '2000'),
 ('Tailgating', '1000'),
-('No Helmet', '1500'),
-('Disregarding Traffic Signs', '1000');
+('Overtaking on a Bridge or Curve', '2000'),
+('Non-functional Signal Lights', '1000'),
+('Driving with a Broken Windshield', '1500'),
+('Tampering with License Plates', '5000'),
+('Refusal to Surrender License', '2000'),
+('Failure to Provide Proof of Registration', '1000'),
+('Illegal Modification of Chassis or Engine', '15000'),
+('Driving while Physically Unfit or Fatigued', '3000'),
+('Illegal Lane Straddling', '2000'),
+('Illegal Street Racing', '30000'),
+('Disregarding Traffic Controller Signals', '1500');
 
 INSERT INTO violations(
   violation_id, license_number, plate_number, violation_type, violation_date, apprehending_officer, 
@@ -254,5 +298,3 @@ INSERT INTO violations(
 ('12345679-0', 'D0124678901', 'ABC-1234', 'Smoke Belching', '2026-04-25', 'Joe Schmoe', 'Unpaid'),
 ('12345679-1', 'D0191234567', 'XYZ-5678', 'Illegal Turn', '2024-02-06', 'Joe Mamma', 'Paid'),
 ('12345679-2', 'B0746010670', 'SVN-3799', 'Beating the Red Light', '2025-03-05', 'Joe Mamma', 'Contested');
-
-
