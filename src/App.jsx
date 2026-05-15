@@ -5,6 +5,7 @@ import VehiclesPage from './features/vehicles/VehiclesPage.jsx'
 import { AppFrame } from './components/index.js'
 import RegistrationsPage from './features/registrations/RegistrationsPage.jsx'
 import ViolationsPage from './features/violations/ViolationsPage.jsx'
+import ReportsPage from './features/reports/ReportsPage.jsx'
 
 function App() {
   const [route, setRoute] = useState({ key: 'dashboard' })
@@ -56,6 +57,10 @@ function App() {
   
   if (route.key === 'violations') {
     return <ViolationsPage onNavigate={navigate} openViolationId={route.violationId} />
+  }
+
+    if (route.key === 'reports') {
+    return <ReportsPage onNavigate={navigate} />
   }
 
 

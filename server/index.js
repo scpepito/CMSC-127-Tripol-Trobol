@@ -5,6 +5,7 @@ import driversRoutes from './routes/driversRoutes.js'
 import vehiclesRoutes from './routes/vehiclesRoutes.js'
 import registrationsRoutes from './routes/registrationsRoutes.js'
 import violationsRoutes from './routes/violationsRoutes.js'
+import reportsRoutes from './routes/reportsRoutes.js'
 
 dotenv.config()
 
@@ -21,6 +22,7 @@ app.use('/drivers', driversRoutes)
 app.use('/vehicles', vehiclesRoutes)
 app.use('/registrations', registrationsRoutes)
 app.use('/violations', violationsRoutes)
+app.use('/reports', reportsRoutes)
 
 const port = Number(process.env.PORT ?? 3001)
 app.listen(port, () => {
