@@ -37,6 +37,29 @@ function mapRowToDriverDetails(row) {
   }
 }
 
+function mapRowToDriverVehicle(row) {
+  return {
+    plate_number: row.plate_number,
+    vehicle_type: row.vehicle_type,
+    make: row.make,
+    model: row.model,
+    year: row.year,
+    color: row.color,
+  }
+}
+
+function mapRowToDriverViolation(row) {
+  return {
+    violation_id: row.violation_id,
+    plate_number: row.plate_number,
+    violation_type: row.violation_type,
+    violation_date: row.violation_date,
+    apprehending_officer: row.apprehending_officer,
+    violation_status: row.violation_status,
+    violation_fine: row.violation_fine,
+  }
+}
+
 function parseDriverPayload(body) {
   const payload = {
     license_number: normalizeLicenseNumber(toTrimmed(body.license_number)),
@@ -175,7 +198,48 @@ export async function getDriver(req, res) {
   )
 
   if (!rows.length) return res.status(404).json({ error: 'Driver not found' })
-  res.json({ driver: mapRowToDriverDetails(rows[0]) })
+  const driver = mapRowToDriverDetails(rows[0])
+
+  const vehicleRows = await query(
+    `
+      SELECT
+        v.plate_number,
+        v.vehicle_type,
+        v.make,
+        v.model,
+        v.year,
+        v.color
+      FROM vehicles v
+      WHERE v.owner_license_number = ?
+      ORDER BY v.plate_number ASC
+      LIMIT 100
+    `,
+    [licenseNumber],
+  )
+
+  const violationRows = await query(
+    `
+      SELECT
+        v.violation_id,
+        v.plate_number,
+        v.violation_type,
+        DATE_FORMAT(v.violation_date, '%Y-%m-%d') AS violation_date,
+        v.apprehending_officer,
+        v.violation_status,
+        f.fine_amount AS violation_fine
+      FROM violations v
+      LEFT JOIN violation_fines f ON f.violation_type = v.violation_type
+      WHERE v.license_number = ?
+      ORDER BY v.violation_date DESC, v.violation_id DESC
+      LIMIT 100
+    `,
+    [licenseNumber],
+  )
+
+  driver.vehicles = vehicleRows.map(mapRowToDriverVehicle)
+  driver.violations = violationRows.map(mapRowToDriverViolation)
+
+  res.json({ driver })
 }
 
 export async function createDriver(req, res) {

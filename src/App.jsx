@@ -56,7 +56,13 @@ function App() {
 
   
   if (route.key === 'violations') {
-    return <ViolationsPage onNavigate={navigate} openViolationId={route.violationId} />
+    return (
+      <ViolationsPage
+        onNavigate={navigate}
+        openViolationId={route.violationId}
+        returnTo={route.returnTo ?? null}
+      />
+    )
   }
 
     if (route.key === 'reports') {

@@ -2,10 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import {
   ArrowDownUp,
   ArrowLeft,
+  CarFront,
+  ChevronRight,
   ClipboardList,
   Eye,
   Filter,
   IdCard,
+  MessageCircleWarning,
   Pencil,
   Plus,
   Trash2,
@@ -48,6 +51,22 @@ const sortOptions = [
   { value: 'name_asc', label: 'Name (A-Z)' },
   { value: 'name_desc', label: 'Name (Z-A)' },
 ]
+
+const formatMoney = (value) => {
+  const amount = Number(value)
+  if (!Number.isFinite(amount)) return 'PHP 0.00'
+  return `PHP ${amount.toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
+
+const violationTone = (status) => {
+  if (status === 'Paid') return 'success'
+  if (status === 'Contested') return 'warning'
+  if (status === 'Unpaid') return 'danger'
+  return 'neutral'
+}
 
 export default function DriversPage({ onNavigate, openLicenseNumber, returnTo }) {
   const [view, setView] = useState('list') // list | create | edit | details
@@ -375,6 +394,138 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
             <SectionCard title="Address Information" icon={<ClipboardList className="size-4" />}>
               <p>{selectedDriver.address?.street}, {selectedDriver.address?.city}</p>
               <p>{selectedDriver.address?.province}, {selectedDriver.address?.region} {selectedDriver.address?.postal_code}</p>
+            </SectionCard>
+
+            <SectionCard
+              title="Vehicles Owned"
+              icon={<CarFront className="size-4" />}
+              action={
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#5B5296] ring-1 ring-[#b7b3ff]/60">
+                  {selectedDriver.vehicles?.length ?? 0} total
+                </span>
+              }
+            >
+              {selectedDriver.vehicles?.length ? (
+                <div className="overflow-x-auto rounded-[14px] ring-1 ring-slate-200">
+                  <div className="min-w-190">
+                    <div className="grid grid-cols-[1.1fr_1.8fr_1.2fr_0.8fr_0.7fr] items-center bg-[#f4f6fe] px-5 py-3 text-xs font-bold uppercase tracking-[0.6px] text-[#5B5296]">
+                      <div>Plate Number</div>
+                      <div>Vehicle</div>
+                      <div>Type</div>
+                      <div>Color</div>
+                      <div className="text-right">Action</div>
+                    </div>
+                    {selectedDriver.vehicles.map((vehicle) => (
+                      <div
+                        key={vehicle.plate_number}
+                        className="grid grid-cols-[1.1fr_1.8fr_1.2fr_0.8fr_0.7fr] items-center border-t border-slate-200 bg-white px-5 py-4 text-[15px] text-slate-900"
+                      >
+                        <div className="font-bold">{vehicle.plate_number}</div>
+                        <div className="min-w-0">
+                          <div className="truncate font-semibold">{`${vehicle.make} ${vehicle.model}`.trim()}</div>
+                          <div className="mt-0.5 text-sm text-slate-500">{vehicle.year}</div>
+                        </div>
+                        <div className="text-slate-600">{vehicle.vehicle_type}</div>
+                        <div className="text-slate-600">{vehicle.color}</div>
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onNavigate?.({
+                                key: 'vehicles',
+                                plateNumber: vehicle.plate_number,
+                                returnTo: {
+                                  key: 'drivers',
+                                  driverLicenseNumber: selectedDriver.license_number,
+                                  returnTo: returnTo ?? null,
+                                },
+                              })
+                            }}
+                            className="grid size-9 place-items-center rounded-xl bg-[#f4f6fe] text-[#8981d2] ring-1 ring-[#b7b3ff]/60 hover:bg-[#ebeefe]"
+                            aria-label={`View vehicle ${vehicle.plate_number}`}
+                            title={`View vehicle ${vehicle.plate_number}`}
+                          >
+                            <ChevronRight className="size-5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-[14px] bg-[#f8f9ff] px-5 py-6 text-center text-sm font-medium text-slate-500 ring-1 ring-slate-200">
+                  No vehicles owned.
+                </div>
+              )}
+            </SectionCard>
+
+            <SectionCard
+              title="Traffic Violations"
+              icon={<MessageCircleWarning className="size-4" />}
+              action={
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#5B5296] ring-1 ring-[#b7b3ff]/60">
+                  {selectedDriver.violations?.length ?? 0} total
+                </span>
+              }
+            >
+              {selectedDriver.violations?.length ? (
+                <div className="overflow-x-auto rounded-[14px] ring-1 ring-slate-200">
+                  <div className="min-w-225">
+                    <div className="grid grid-cols-[1.1fr_2fr_1fr_1fr_1fr_0.7fr] items-center bg-[#f4f6fe] px-5 py-3 text-xs font-bold uppercase tracking-[0.6px] text-[#5B5296]">
+                      <div>Ticket Number</div>
+                      <div>Violation</div>
+                      <div>Date</div>
+                      <div>Fine</div>
+                      <div>Status</div>
+                      <div className="text-right">Action</div>
+                    </div>
+                    {selectedDriver.violations.map((violation) => (
+                      <div
+                        key={violation.violation_id}
+                        className="grid grid-cols-[1.1fr_2fr_1fr_1fr_1fr_0.7fr] items-center border-t border-slate-200 bg-white px-5 py-4 text-[15px] text-slate-900"
+                      >
+                        <div className="font-bold">{violation.violation_id}</div>
+                        <div className="min-w-0">
+                          <div className="truncate font-semibold">{violation.violation_type}</div>
+                          <div className="mt-0.5 text-sm text-slate-500">{violation.plate_number}</div>
+                        </div>
+                        <div className="text-slate-600">{violation.violation_date}</div>
+                        <div className="font-semibold text-slate-700">{formatMoney(violation.violation_fine)}</div>
+                        <div>
+                          <StatusPill tone={violationTone(violation.violation_status)}>
+                            {violation.violation_status}
+                          </StatusPill>
+                        </div>
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              onNavigate?.({
+                                key: 'violations',
+                                violationId: violation.violation_id,
+                                returnTo: {
+                                  key: 'drivers',
+                                  driverLicenseNumber: selectedDriver.license_number,
+                                  returnTo: returnTo ?? null,
+                                },
+                              })
+                            }}
+                            className="grid size-9 place-items-center rounded-xl bg-[#f4f6fe] text-[#8981d2] ring-1 ring-[#b7b3ff]/60 hover:bg-[#ebeefe]"
+                            aria-label={`View violation ${violation.violation_id}`}
+                            title={`View violation ${violation.violation_id}`}
+                          >
+                            <ChevronRight className="size-5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="rounded-[14px] bg-[#f8f9ff] px-5 py-6 text-center text-sm font-medium text-slate-500 ring-1 ring-slate-200">
+                  No traffic violations.
+                </div>
+              )}
             </SectionCard>
             <div className="flex justify-end">
               <Button
