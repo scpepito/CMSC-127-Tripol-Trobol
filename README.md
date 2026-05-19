@@ -1,79 +1,102 @@
 # CMSC 127 - Tripol Trobol
 
-Full-stack app:
-- Frontend: React + Vite + Tailwind (`/`)
-- Backend: Express + MariaDB (`/server`)
+Tripol Trobol is a full-stack LTO records management system for CMSC 127. It manages drivers, vehicles, vehicle registrations, traffic violations, and generated reports through a React web app backed by an Express API and MariaDB database.
 
-## Quick start (recommended)
+## Tech Stack
 
-You’ll run **3 things**: MariaDB, the API server, and the Vite web app.
+Frontend:
+- ReactJS
+- Tailwind CSS
 
-### 0) Prerequisites
+Backend:
+- Node.js
+- Express
 
-- Node.js (LTS recommended) + npm
-- MariaDB (or MySQL) running locally
+## Project Structure
 
-### 1) Install dependencies
+- `src/` - React frontend, pages, reusable components, API clients, and helpers
+- `server/` - Express API, routes, controllers, validators, and database scripts
+- `server/db/schema.sql` - database schema and seed setup
 
-In the project root:
+## How To Run
+
+Prerequisites:
+- Node.js LTS and npm
+- MariaDB or MySQL running locally
+
+Install frontend dependencies from the project root:
 
 ```bash
 npm install
 ```
 
-In `server/`:
+Install backend dependencies:
 
 ```bash
 cd server
 npm install
 ```
 
-### 2) Configure environment variables
+Create the backend environment file:
 
-Create `server/.env` based on `server/.env.example`. 
+```bash
+cp .env.example .env
+```
 
-Edit `server/.env` and set your DB credentials.
+Edit `server/.env` with your local database credentials:
 
-Note: `server/.env` is gitignored
+```env
+PORT=3001
+CORS_ORIGIN=http://localhost:5173
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=tripol_trobol
+```
 
-### 3) Initialize the database
+Initialize the database from inside `server/`:
 
-This runs `server/db/schema.sql` (creates the DB + tables + seed data).
+```bash
+npm run db:init
+```
+
+Start the backend API from inside `server/`:
+
+```bash
+npm run dev
+```
+
+Start the frontend from the project root in a second terminal:
+
+```bash
+npm run dev
+```
+
+Open the app at `http://localhost:5173`. The API runs at `http://localhost:3001` by default.
+
+## Useful Commands
+
+Frontend:
+
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
+
+Backend:
 
 ```bash
 cd server
 npm run db:init
-```
-
-### 4) Run the backend (API)
-
-```bash
-cd server
 npm run dev
+npm start
 ```
 
-API runs on `http://localhost:3001` by default.
+Optional frontend API override:
 
-### 5) Run the frontend (web app)
-
-In a new terminal, from the project root:
-
-```bash
-npm run dev
+```env
+VITE_API_BASE_URL=http://localhost:3001
 ```
-
-Vite runs on `http://localhost:5173` by default.
-
-## Environment variables
-
-### Backend (`server/.env`)
-
-See `server/.env.example` for the full list.
-
-- `PORT` (default: `3001`)
-- `CORS_ORIGIN` (default: `http://localhost:5173`)
-- `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-
-### Frontend (`.env` optional)
-
-The frontend talks to the API at `http://localhost:3001` by default.
