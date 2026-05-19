@@ -1,3 +1,5 @@
+import { formatNameWithMiddleInitial } from '../../lib/personName.js'
+
 export function toStatusTone(status) {
   if (status === 'Unpaid') return 'danger'
   if (status === 'Paid') return 'success'
@@ -17,7 +19,7 @@ export function listRowFromApi(violation) {
     vehicleName: violation.plate_number, 
     vehicleSub: '', 
     
-    driverName: violation.driver_name ?? '',
+    driverName: formatNameWithMiddleInitial(violation.driver_name),
     driverLicenseNumber: violation.license_number ?? '', 
     
     _raw: violation,

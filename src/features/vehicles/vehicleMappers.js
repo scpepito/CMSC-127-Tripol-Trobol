@@ -1,3 +1,5 @@
+import { formatNameWithMiddleInitial } from '../../lib/personName.js'
+
 export function listRowFromApi(vehicle) {
   return {
     id: vehicle.plate_number,
@@ -5,7 +7,7 @@ export function listRowFromApi(vehicle) {
     vehicleName: `${vehicle.make} ${vehicle.model}`.trim(),
     vehicleSub: `${vehicle.year} • ${vehicle.color}`,
     type: vehicle.vehicle_type,
-    ownerName: vehicle.owner?.full_name ?? '',
+    ownerName: formatNameWithMiddleInitial(vehicle.owner?.full_name),
     ownerLicenseNumber: vehicle.owner?.license_number ?? '',
     _raw: vehicle,
   }

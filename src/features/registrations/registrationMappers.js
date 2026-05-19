@@ -1,3 +1,5 @@
+import { formatNameWithMiddleInitial } from '../../lib/personName.js'
+
 export function toStatusTone(status) {
   if (status === 'Active') return 'success'
   if (status === 'Expired') return 'danger'
@@ -14,7 +16,7 @@ export function listRowFromApi(registration) {
     statusTone: toStatusTone(registration.registration_status),
     vehicleName: `${registration.vehicle?.make} ${registration.vehicle?.model} (${registration.vehicle?.year})`.trim(),
     vehiclePlate: registration.vehicle?.plate_number,
-    ownerName: registration.owner?.full_name ?? '',
+    ownerName: formatNameWithMiddleInitial(registration.owner?.full_name),
     ownerLicenseNumber: registration.owner?.license_number ?? '',
     _raw: registration
   }
