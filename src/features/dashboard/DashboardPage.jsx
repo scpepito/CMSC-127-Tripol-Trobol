@@ -25,14 +25,14 @@ function DashboardIllustration({ variant }) {
   const t = tones[variant] ?? tones.drivers
 
   return (
-    <div className="relative h-28 w-32">
+    <div className="relative h-[clamp(96px,16vh,148px)] w-[clamp(112px,18vh,168px)]">
       <div className={cn('absolute left-0 top-2 size-2 rounded-full', t.dot)} aria-hidden />
       <div className={cn('absolute left-4 top-21 size-3 rounded-full border-2', t.outline)} aria-hidden />
       <IconShadowLine />
 
       <svg
         viewBox="0 0 128 112"
-        className="absolute left-0 top-0 h-28 w-32"
+        className="absolute left-0 top-0 h-full w-full"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden
@@ -101,29 +101,29 @@ function DashboardCard({
       type="button"
       onClick={onClick}
       className={cn(
-        'flex h-[clamp(140px,18vh,160px)] w-full items-center justify-between gap-4 rounded-2xl border pl-6.25 pr-10.25 py-6 text-left',
+        'flex h-full min-h-0 w-full items-center justify-between gap-[clamp(14px,2vw,28px)] rounded-2xl border px-[clamp(18px,2.4vw,36px)] py-[clamp(18px,3vh,32px)] text-left',
         'shadow-[5px_5px_7px_0px_rgba(0,0,0,0.05)]',
         t.bg,
         t.border,
         'enabled:cursor-pointer enabled:hover:shadow-[6px_6px_10px_0px_rgba(0,0,0,0.06)]',
       )}
     >
-      <div className="flex min-w-0 items-center gap-5">
+      <div className="flex min-w-0 items-center gap-[clamp(16px,2vw,28px)]">
         <div className="shrink-0">{illustration}</div>
         <div className="min-w-0">
-          <div className="text-[24px] font-bold leading-7.5 text-[#202244]">{title}</div>
-          <div className="mt-1 max-w-62 text-[14px] leading-4.25 text-[#8487a8]">{description}</div>
+          <div className="text-[clamp(22px,2vw,30px)] font-bold leading-tight text-[#202244]">{title}</div>
+          <div className="mt-2 max-w-76 text-[clamp(14px,1.15vw,16px)] leading-snug text-[#8487a8]">{description}</div>
         </div>
       </div>
 
       <span
         className={cn(
-          'grid size-10 shrink-0 place-items-center rounded-full text-white shadow-sm',
+          'grid size-[clamp(40px,4vw,52px)] shrink-0 place-items-center rounded-full text-white shadow-sm',
           t.arrow,
         )}
         aria-hidden
       >
-        <ChevronRight className="size-5" />
+        <ChevronRight className="size-[clamp(20px,2vw,26px)]" />
       </span>
     </button>
   )
@@ -160,7 +160,7 @@ function AlertRow({ tone = 'warning', children, onClick }) {
 export default function DashboardPage({ onNavigate }) {
   return (
     <AppFrame activeKey="dashboard" onNavigate={onNavigate}>
-      <div className="-mx-6 -my-6 h[calc(100vh-61px)] overflow-hidden">
+      <div className="-mx-6 -my-6 h-[calc(100vh-3.8125rem)] overflow-hidden">
         <div
           className="h-full rounded-none px-[clamp(16px,2.5vh,24px)] py-[clamp(16px,2.5vh,24px)]"
           style={{
@@ -168,15 +168,15 @@ export default function DashboardPage({ onNavigate }) {
               "linear-gradient(148.57533439194958deg, rgb(249, 250, 251) 0%, rgba(250, 245, 255, 0.3) 50%, rgba(239, 246, 255, 0.3) 100%), linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%)",
           }}
         >
-          <div className="m-4.5 flex h-full max-w-300 flex-col">
-            <div className="">
+          <div className="mx-auto flex h-full max-w-340 flex-col px-[clamp(12px,2vw,28px)] py-[clamp(10px,1.8vh,22px)]">
+            <div className="shrink-0">
               <PageHeader
                 title="Dashboard"
                 subtitle="Information Management System Dashboard"
               />
             </div>
 
-            <div className="mt-5 grid grid-cols-1 gap-x-4 gap-y-[clamp(16px,3.5vh,28px)] md:grid-cols-2">
+            <div className="mt-[clamp(18px,3vh,34px)] grid min-h-0 flex-1 grid-cols-1 grid-rows-4 gap-[clamp(14px,2.8vh,28px)] md:grid-cols-2 md:grid-rows-2">
               <DashboardCard
                 tone="drivers"
                 title="Driver Management"
