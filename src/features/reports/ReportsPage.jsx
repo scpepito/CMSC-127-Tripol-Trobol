@@ -89,8 +89,16 @@ const defaultFilters = {
   'violations-by-location': { city: '', region: '' },
 }
 
+const numberColumn = {
+  key: 'number',
+  header: 'No.',
+  width: 72,
+  render: (_, index) => <span className="font-medium text-slate-500">{index + 1}</span>,
+}
+
 const resultColumns = {
   'drivers-by-license-type': [
+    numberColumn,
     { key: 'name', header: 'Name', render: (row) => row.name },
     {
       key: 'licenseNumber',
@@ -103,6 +111,7 @@ const resultColumns = {
     { key: 'sex', header: 'Sex', width: 140, render: (row) => row.sex },
   ],
   'vehicles-by-owner': [
+    numberColumn,
     { key: 'name', header: 'Name', render: (row) => row.name },
     { key: 'plateNumber', header: 'Plate Number', render: (row) => row.plateNumber },
     { key: 'vehicle', header: 'Vehicle', render: (row) => row.vehicle },
@@ -114,6 +123,7 @@ const resultColumns = {
     },
   ],
   'expired-vehicle-registrations': [
+    numberColumn,
     { key: 'plateNumber', header: 'Plate Number', render: (row) => row.plateNumber },
     { key: 'vehicle', header: 'Vehicle', render: (row) => row.vehicle },
     { key: 'owner', header: 'Owner', render: (row) => row.owner },
@@ -121,6 +131,7 @@ const resultColumns = {
     { key: 'daysExpired', header: 'Days Expired', render: (row) => row.daysExpired },
   ],
   'expired-suspended-licenses': [
+    numberColumn,
     { key: 'name', header: 'Name', render: (row) => row.name },
     {
       key: 'licenseNumber',
@@ -132,6 +143,7 @@ const resultColumns = {
     { key: 'expirationDate', header: 'Expiration Date', render: (row) => row.expirationDate },
   ],
   'violations-by-driver': [
+    numberColumn,
     { key: 'name', header: 'Name', render: (row) => row.name },
     { key: 'ticketNumber', header: 'Ticket Number', render: (row) => row.ticketNumber },
     { key: 'violationType', header: 'Violation Type', render: (row) => row.violationType },
@@ -141,10 +153,12 @@ const resultColumns = {
     { key: 'status', header: 'Status', render: (row) => row.status },
   ],
   'violations-by-type': [
+    numberColumn,
     { key: 'violationType', header: 'Violation Type', render: (row) => row.violationType },
     { key: 'totalCount', header: 'Total Count', render: (row) => row.totalCount },
   ],
   'violations-by-location': [
+    numberColumn,
     { key: 'plateNumber', header: 'Plate Number', render: (row) => row.plateNumber },
     { key: 'vehicle', header: 'Vehicle', render: (row) => row.vehicle },
     { key: 'driver', header: 'Driver', render: (row) => row.driver },
