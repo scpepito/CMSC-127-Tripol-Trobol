@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
   ArrowLeft,
+  ClipboardList,
   Eye,
   Filter,
-  User,
   ChevronRight,
   Pencil,
   Plus,
   Trash2,
+  CarFront,
+  MessageCircleWarning,
+  Users,
 } from 'lucide-react'
 import {
   AppFrame,
@@ -17,12 +20,16 @@ import {
   PageHeader,
   SearchInput,
   SectionCard,
+  StatusPill,
   VehicleDetailsHero,
 } from '../../components/index.js'
 import { createVehicle, deleteVehicle, getVehicle, listVehicles, updateVehicle } from '../../api/vehicles.js'
 import { formatLicenseNumber } from '../../lib/licenseNumber.js'
+import { formatNameWithMiddleInitial } from '../../lib/personName.js'
 import VehicleForm from './VehicleForm.jsx'
 import { listRowFromApi } from './vehicleMappers.js'
+import { toStatusTone as toRegistrationStatusTone } from '../registrations/registrationMappers.js'
+import { toStatusTone as toViolationStatusTone } from '../violations/violationMappers.js'
 
 const vehicleTypeFilterOptions = [
   { value: '', label: 'All' },
@@ -30,6 +37,15 @@ const vehicleTypeFilterOptions = [
   { value: 'Motorcycle', label: 'Motorcycle' },
   { value: 'Public Utility Vehicle', label: 'Public Utility Vehicle' },
 ]
+
+const formatMoney = (value) => {
+  const amount = Number(value)
+  if (!Number.isFinite(amount)) return 'PHP 0.00'
+  return `PHP ${amount.toLocaleString('en-PH', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
 
 export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) {
   const [view, setView] = useState('list') // list | create | edit | details
@@ -217,6 +233,144 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
     },
   ]
 
+  const registrationColumns = [
+    {
+      key: 'number',
+      header: 'No.',
+      width: 72,
+      render: (_, index) => <span className="font-medium text-slate-500">{index + 1}</span>,
+    },
+    {
+      key: 'registration_number',
+      header: 'Registration Number',
+      width: 220,
+      render: (row) => <span className="font-medium">{row.registration_number}</span>,
+    },
+    {
+      header: 'Registration Date',
+      key: 'registration_date',
+      width: 200,
+      render: (row) => <span className="text-slate-600">{row.registration_date}</span>,
+    },
+    {
+      key: 'expiration',
+      header: 'Expiration Date',
+      width: 200,
+      render: (row) => <span className="text-slate-600">{row.expiration_date}</span>,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      width: 140,
+      render: (row) => (
+        <StatusPill tone={toRegistrationStatusTone(row.registration_status)}>
+          {row.registration_status}
+        </StatusPill>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: 120,
+      align: 'right',
+      render: (row) => (
+        <button
+          type="button"
+          onClick={() => {
+            onNavigate?.({
+              key: 'registrations',
+              regNumber: row.registration_number,
+              returnTo: { key: 'vehicles', plateNumber: selectedVehicle.plate_number, returnTo: returnTo ?? null },
+            })
+          }}
+          className="ml-12 grid size-9 place-items-center rounded-xl bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
+          aria-label={`View registration ${row.registration_number}`}
+          title={`View registration ${row.registration_number}`}
+        >
+          <ChevronRight className="size-5" />
+        </button>
+      ),
+    },
+  ]
+
+  const violationColumns = [
+    {
+      key: 'number',
+      header: 'No.',
+      width: 72,
+      render: (_, index) => <span className="font-medium text-slate-500">{index + 1}</span>,
+    },
+    {
+      key: 'violation_id',
+      header: 'Ticket Number',
+      width: 170,
+      render: (row) => <span className="font-medium">{row.violation_id}</span>,
+    },
+    {
+      key: 'violation_type',
+      header: 'Violation',
+      render: (row) => <span className="text-slate-600">{row.violation_type}</span>,
+    },
+    {
+      key: 'driver',
+      header: 'Driver',
+      width: 200,
+      render: (row) => (
+        <div>
+          <div className="font-medium">{formatNameWithMiddleInitial(row.driver_name)}</div>
+          <div className="mt-0.5 text-sm text-slate-500">
+            {formatLicenseNumber(row.license_number ?? '')}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'violation_date',
+      header: 'Date',
+      width: 150,
+      render: (row) => <span className="text-slate-600">{row.violation_date}</span>,
+    },
+    {
+      key: 'violation_fine',
+      header: 'Fine Amount',
+      width: 160,
+      render: (row) => <span className="text-slate-600">{formatMoney(row.violation_fine)}</span>,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      width: 140,
+      render: (row) => (
+        <StatusPill tone={toViolationStatusTone(row.violation_status)}>
+          {row.violation_status}
+        </StatusPill>
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      width: 120,
+      align: 'right',
+      render: (row) => (
+        <button
+          type="button"
+          onClick={() => {
+            onNavigate?.({
+              key: 'violations',
+              violationId: row.violation_id,
+              returnTo: { key: 'vehicles', plateNumber: selectedVehicle.plate_number, returnTo: returnTo ?? null },
+            })
+          }}
+          className="ml-6 grid size-9 place-items-center rounded-xl bg-white text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50"
+          aria-label={`View violation ${row.violation_id}`}
+          title={`View violation ${row.violation_id}`}
+        >
+          <ChevronRight className="size-5" />
+        </button>
+      ),
+    },
+  ]
+
   if (view === 'create' || view === 'edit') {
     return (
       <AppFrame activeKey="vehicles" onNavigate={onNavigate}>
@@ -253,7 +407,7 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
               onSubmit={view === 'edit' ? handleUpdate : handleCreate}
               onCancel={() => setView('list')}
               saving={saving}
-              submitLabel={view ==='create' ? "Save Vehicle" : "Save changes"}
+              submitLabel={view === 'create' ? "Save Vehicle" : "Save changes"}
             />
           </div>
         </div>
@@ -299,7 +453,10 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
               ownerLicense={formatLicenseNumber(selectedVehicle.owner?.license_number ?? '')}
             />
 
-            <SectionCard title="Vehicle Information" accent="pink">
+            <SectionCard
+              title="Vehicle Information"
+              icon={<CarFront className="size-4" />}
+              accent="pink">
               <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
                 <div>
                   <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Plate Number</div>
@@ -332,7 +489,9 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
               </div>
             </SectionCard>
 
-            <SectionCard title="Owner Information" accent="pink">
+            <SectionCard title="Owner Information"
+              icon={<Users className="size-4" />}
+              accent="pink">
               <button
                 type="button"
                 disabled={!selectedVehicle.owner?.license_number}
@@ -349,9 +508,6 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
                 aria-label={selectedVehicle.owner?.license_number ? 'View owner details' : 'Owner not available'}
                 title={selectedVehicle.owner?.license_number ? 'View owner details' : 'Owner not available'}
               >
-                <div className="grid size-12 place-items-center rounded-2xl bg-[#fbf3fd] text-[#bf68c5] ring-1 ring-[#cf89d4]/40">
-                  <User className="size-5" />
-                </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-semibold">{selectedVehicle.owner?.full_name}</div>
                   <div className="mt-0.5 text-sm text-slate-500">
@@ -360,6 +516,54 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
                 </div>
                 <ChevronRight className="size-5 shrink-0 text-slate-400" />
               </button>
+            </SectionCard>
+
+            <SectionCard
+              title="Registration History"
+              icon={<ClipboardList className="size-4" />}
+              action={
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#bf68c5] ring-1 ring-[#b7b3ff]/60">
+                  {selectedVehicle.registrations?.length ?? 0} total
+                </span>
+              }
+              accent="pink"
+            >
+              {selectedVehicle.registrations?.length ? (
+                <DataTable
+                  theadClassName="bg-white text-[#bf68c5]"
+                  columns={registrationColumns}
+                  rows={selectedVehicle.registrations}
+                  getRowKey={(row) => row.registration_number}
+                />
+              ) : (
+                <div className="rounded-[14px] bg-[#fbf3fd] px-5 py-6 text-center text-sm font-medium text-slate-500 ring-1 ring-slate-200">
+                  No registration history.
+                </div>
+              )}
+            </SectionCard>
+
+            <SectionCard
+              title="Traffic Violations"
+              icon={<MessageCircleWarning className="size-4" />}
+              action={
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#bf68c5] ring-1 ring-[#b7b3ff]/60">
+                  {selectedVehicle.violations?.length ?? 0} total
+                </span>
+              }
+              accent="pink"
+            >
+              {selectedVehicle.violations?.length ? (
+                <DataTable
+                  theadClassName="bg-white"
+                  columns={violationColumns}
+                  rows={selectedVehicle.violations}
+                  getRowKey={(row) => row.violation_id}
+                />
+              ) : (
+                <div className="rounded-[14px] bg-[#fbf3fd] px-5 py-6 text-center text-sm font-medium text-slate-500 ring-1 ring-slate-200">
+                  No traffic violations.
+                </div>
+              )}
             </SectionCard>
 
           </div>

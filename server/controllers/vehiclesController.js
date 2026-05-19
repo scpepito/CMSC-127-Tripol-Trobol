@@ -32,6 +32,30 @@ function mapRowToVehicleDetails(row) {
       license_number: row.owner_license_number,
       full_name: row.owner_name,
     },
+    registrations: [],
+    violations: [],
+  }
+}
+
+function mapRowToVehicleRegistration(row) {
+  return {
+    registration_number: row.registration_number,
+    registration_date: row.registration_date,
+    expiration_date: row.expiration_date,
+    registration_status: row.registration_status,
+  }
+}
+
+function mapRowToVehicleViolation(row) {
+  return {
+    violation_id: row.violation_id,
+    license_number: row.license_number,
+    driver_name: row.driver_name,
+    violation_type: row.violation_type,
+    violation_date: row.violation_date,
+    apprehending_officer: row.apprehending_officer,
+    violation_status: row.violation_status,
+    violation_fine: row.violation_fine,
   }
 }
 
@@ -147,6 +171,45 @@ export async function getVehicle(req, res) {
   if (!rows.length) return res.status(404).json({ error: 'Vehicle not found' })
 
   const vehicle = mapRowToVehicleDetails(rows[0])
+
+  const registrationRows = await query(
+    `
+      SELECT
+        r.registration_number,
+        DATE_FORMAT(r.registration_date, '%Y-%m-%d') AS registration_date,
+        DATE_FORMAT(r.expiration_date, '%Y-%m-%d') AS expiration_date,
+        r.registration_status
+      FROM vehicle_registrations r
+      WHERE r.vehicle_plate_number = ?
+      ORDER BY r.registration_date DESC, r.registration_number DESC
+      LIMIT 100
+    `,
+    [plateNumber],
+  )
+
+  const violationRows = await query(
+    `
+      SELECT
+        v.violation_id,
+        v.license_number,
+        CONCAT_WS(' ', d.first_name, d.middle_name, d.last_name) AS driver_name,
+        v.violation_type,
+        DATE_FORMAT(v.violation_date, '%Y-%m-%d') AS violation_date,
+        v.apprehending_officer,
+        v.violation_status,
+        f.fine_amount AS violation_fine
+      FROM violations v
+      JOIN drivers d ON d.license_number = v.license_number
+      LEFT JOIN violation_fines f ON f.violation_type = v.violation_type
+      WHERE v.plate_number = ?
+      ORDER BY v.violation_date DESC, v.violation_id DESC
+      LIMIT 100
+    `,
+    [plateNumber],
+  )
+
+  vehicle.registrations = registrationRows.map(mapRowToVehicleRegistration)
+  vehicle.violations = violationRows.map(mapRowToVehicleViolation)
 
   res.json({ vehicle })
 }
