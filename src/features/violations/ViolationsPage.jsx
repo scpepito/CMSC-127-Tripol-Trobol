@@ -166,6 +166,12 @@ useEffect(() => {
 
   const columns = [
     {
+      key: 'number',
+      header: 'No.',
+      width: 72,
+      render: (_, index) => <span className="font-medium text-slate-500">{index + 1}</span>,
+    },
+    {
       key: 'violationId',
       header: 'Ticket Number',
       width: 160,

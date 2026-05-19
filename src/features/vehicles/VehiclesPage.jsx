@@ -154,6 +154,12 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
 
   const columns = [
     {
+      key: 'number',
+      header: 'No.',
+      width: 72,
+      render: (_, index) => <span className="font-medium text-slate-500">{index + 1}</span>,
+    },
+    {
       key: 'plateNumber',
       header: 'Plate Number',
       width: 160,

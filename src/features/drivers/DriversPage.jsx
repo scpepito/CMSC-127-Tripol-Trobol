@@ -47,11 +47,6 @@ const licenseTypeFilterOptions = [
   { value: 'Professional', label: 'Professional' },
 ]
 
-const sortOptions = [
-  { value: 'name_asc', label: 'Name (A-Z)' },
-  { value: 'name_desc', label: 'Name (Z-A)' },
-]
-
 const formatMoney = (value) => {
   const amount = Number(value)
   if (!Number.isFinite(amount)) return 'PHP 0.00'
@@ -199,9 +194,15 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
 
   const columns = [
     {
+      key: 'number',
+      header: 'No.',
+      width: 72,
+      render: (_, index) => <span className="font-medium text-slate-500">{index + 1}</span>,
+    },
+    {
       key: 'licenseNumber',
       header: 'License Number',
-      width: 200,
+      width: 180,
       render: (row) => (
         <span className="font-medium">{formatLicenseNumber(row.licenseNumber)}</span>
       ),
@@ -224,13 +225,13 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
     {
       key: 'expiration',
       header: 'Expiration',
-      width: 160,
+      width: 150,
       render: (row) => <span className="text-slate-600">{row.expiration}</span>,
     },
     {
       key: 'actions',
       header: 'Actions',
-      width: 220,
+      width: 180,
       align: 'right',
       render: (row) => (
         <div className="flex items-center justify-end gap-2">
@@ -408,7 +409,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
               {selectedDriver.vehicles?.length ? (
                 <div className="overflow-x-auto rounded-[14px] ring-1 ring-slate-200">
                   <div className="min-w-190">
-                    <div className="grid grid-cols-[1.1fr_1.8fr_1.2fr_0.8fr_0.7fr] items-center bg-[#f4f6fe] px-5 py-3 text-xs font-bold uppercase tracking-[0.6px] text-[#5B5296]">
+                    <div className="grid grid-cols-[1.1fr_1.8fr_1.2fr_0.8fr_0.7fr] items-center px-5 py-3 text-xs font-bold uppercase tracking-[0.6px] text-[#5B5296]">
                       <div>Plate Number</div>
                       <div>Vehicle</div>
                       <div>Type</div>
@@ -471,7 +472,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
               {selectedDriver.violations?.length ? (
                 <div className="overflow-x-auto rounded-[14px] ring-1 ring-slate-200">
                   <div className="min-w-225">
-                    <div className="grid grid-cols-[1.1fr_2fr_1fr_1fr_1fr_0.7fr] items-center bg-[#f4f6fe] px-5 py-3 text-xs font-bold uppercase tracking-[0.6px] text-[#5B5296]">
+                    <div className="grid grid-cols-[1.1fr_2fr_1fr_1fr_1fr_0.7fr] items-center px-5 py-3 text-xs font-bold uppercase tracking-[0.6px] text-[#5B5296]">
                       <div>Ticket Number</div>
                       <div>Violation</div>
                       <div>Date</div>
@@ -592,16 +593,16 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
                 />
               </div>
 
-              <div className="w-full md:w-55">
-                <Combobox
-                  leftIcon={<ArrowDownUp className="size-5" />}
-                  value={sort}
-                  onChange={(v) => setSort(v)}
-                  options={sortOptions}
-                  placeholder="Sort"
-                  searchable={false}
-                />
-              </div>
+              <button
+                type="button"
+                onClick={() => setSort((current) => (current === 'name_asc' ? 'name_desc' : 'name_asc'))}
+                className="flex h-12 w-full items-center gap-3 rounded-[14px] bg-white px-4 text-left text-[15px] text-slate-700 shadow-sm ring-1 ring-slate-200 hover:bg-slate-50 md:w-55"
+                aria-label="Toggle name sort order"
+                title="Toggle name sort order"
+              >
+                <ArrowDownUp className="size-5 text-slate-500" />
+                <span>{sort === 'name_asc' ? 'Name (A-Z)' : 'Name (Z-A)'}</span>
+              </button>
             </div>
           </div>
         </div>

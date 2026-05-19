@@ -157,6 +157,12 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 
 	const columns = [
 		{
+			key: 'number',
+			header: 'No.',
+			width: 72,
+			render: (_, index) => <span className="font-medium text-slate-500">{index + 1}</span>,
+		},
+		{
 			key: 'registrationNumber',
 			header: 'Registration Number',
 			width: 220,
