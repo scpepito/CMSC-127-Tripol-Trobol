@@ -1,6 +1,6 @@
-# CMSC 127 - Tripol Trobol
+# CMSC 127 - LTO Information Management System
 
-Tripol Trobol is a full-stack LTO records management system for CMSC 127. It manages drivers, vehicles, vehicle registrations, traffic violations, and generated reports through a React web app backed by an Express API and MariaDB database.
+This project is a LTO information management system for CMSC 127: File Processing and Database Systems, developed by the Tripol Trobol. It manages drivers, vehicles, vehicle registrations, traffic violations, and generated reports through a React web app backed by an Express API and MariaDB database.
 
 ## Tech Stack
 
