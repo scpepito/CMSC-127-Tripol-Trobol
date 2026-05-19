@@ -511,7 +511,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
                                 },
                               })
                             }}
-                            className="grid size-9 place-items-center rounded-xl bg-[#f4f6fe] text-[#8981d2] ring-1 ring-[#b7b3ff]/60 hover:bg-[#ebeefe]"
+                            className="grid size-9 place-items-center rounded-xl bg-white text-[#8981d2] ring-1 ring-[#b7b3ff]/60 hover:bg-[#ebeefe]"
                             aria-label={`View violation ${violation.violation_id}`}
                             title={`View violation ${violation.violation_id}`}
                           >

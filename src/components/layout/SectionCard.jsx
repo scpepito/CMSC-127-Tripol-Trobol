@@ -20,9 +20,9 @@ export default function SectionCard({
       title: 'text-[#bf68c5]',
     },
     orange: {
-      border: 'border-[#E6757D]',
+      border: 'border-[#E3899C]',
       headerBg: 'bg-[#FEF4F4]',
-      title: 'text-[#E86668]',
+      title: 'text-[#E3899C]',
     },
     green : {
       border: 'border-[#26BA84]',

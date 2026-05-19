@@ -168,13 +168,13 @@ useEffect(() => {
     {
       key: 'number',
       header: 'No.',
-      width: 72,
+      width: 50,
       render: (_, index) => <span className="font-medium text-slate-500">{index + 1}</span>,
     },
     {
       key: 'violationId',
       header: 'Ticket Number',
-      width: 160,
+      width: 150,
       render: (row) => <span className="font-medium">{row.violationId}</span>,
     },
     { key: 'driver', header: 'Driver', width: 220, render: (row) => <span className="text-slate-600">{row.driverName}</span> },
