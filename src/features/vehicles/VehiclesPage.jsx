@@ -16,6 +16,7 @@ import {
   AppFrame,
   Button,
   Combobox,
+  ConfirmModal,
   DataTable,
   PageHeader,
   SearchInput,
@@ -57,6 +58,7 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [pendingDeletePlateNumber, setPendingDeletePlateNumber] = useState(null)
 
   const [vehicles, setVehicles] = useState([])
   const [selectedVehicle, setSelectedVehicle] = useState(null)
@@ -134,6 +136,7 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
     } catch (e) {
       setError(e.message)
     } finally {
+      setPendingDeletePlateNumber(null)
       setSaving(false)
     }
   }
@@ -220,7 +223,7 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
           </button>
           <button
             type="button"
-            onClick={() => handleDelete(row.plateNumber)}
+            onClick={() => setPendingDeletePlateNumber(row.plateNumber)}
             disabled={saving}
             className="grid size-9 place-items-center rounded-xl bg-white cursor-pointer disabled:cursor-not-allowed"
             aria-label="Delete"
@@ -625,6 +628,15 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
 
         {loading ? <div className="mt-4 text-sm text-slate-500">Loading...</div> : null}
       </div>
+      <ConfirmModal
+        open={Boolean(pendingDeletePlateNumber)}
+        title="Delete vehicle?"
+        description={`Vehicle ${pendingDeletePlateNumber ?? ''} will be permanently removed.`}
+        confirmLabel="Delete Vehicle"
+        busy={saving}
+        onCancel={() => setPendingDeletePlateNumber(null)}
+        onConfirm={() => handleDelete(pendingDeletePlateNumber)}
+      />
     </AppFrame>
   )
 }

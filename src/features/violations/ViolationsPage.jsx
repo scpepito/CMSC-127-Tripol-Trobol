@@ -16,6 +16,7 @@ import {
   AppFrame,
   Button,
   Combobox,
+  ConfirmModal,
   DataTable,
   PageHeader,
   SearchInput,
@@ -45,6 +46,7 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [pendingDeleteViolationId, setPendingDeleteViolationId] = useState(null)
 
   const [violations, setViolations] = useState([])
   const [selectedViolation, setSelectedViolation] = useState(null)
@@ -130,6 +132,7 @@ useEffect(() => {
     } catch (e) {
       setError(e.message)
     } finally {
+      setPendingDeleteViolationId(null)
       setSaving(false)
     }
   }
@@ -216,7 +219,7 @@ useEffect(() => {
           </button>
           <button
             type="button"
-            onClick={() => handleDelete(row.violationId)}
+            onClick={() => setPendingDeleteViolationId(row.violationId)}
             disabled={saving}
             className="grid size-9 place-items-center rounded-xl bg-white cursor-pointer disabled:cursor-not-allowed"
             aria-label="Delete"
@@ -474,6 +477,15 @@ useEffect(() => {
 
         {loading ? <div className="mt-4 text-sm text-slate-500">Loading...</div> : null}
       </div>
+      <ConfirmModal
+        open={Boolean(pendingDeleteViolationId)}
+        title="Delete violation?"
+        description={`Violation ${pendingDeleteViolationId ?? ''} will be permanently removed.`}
+        confirmLabel="Delete Violation"
+        busy={saving}
+        onCancel={() => setPendingDeleteViolationId(null)}
+        onConfirm={() => handleDelete(pendingDeleteViolationId)}
+      />
     </AppFrame>
   )
 }

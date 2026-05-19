@@ -17,6 +17,8 @@ export { default as IconButton } from './data/IconButton.jsx'
 export { default as KeyValueGrid } from './data/KeyValueGrid.jsx'
 export { default as StatusPill } from './data/StatusPill.jsx'
 
+export { default as ConfirmModal } from './feedback/ConfirmModal.jsx'
+
 export { default as HeroSummaryCard } from './display/HeroSummaryCard.jsx'
 export { default as DriverDetailsHero } from './display/DriverDetailsHero.jsx'
 export { default as VehicleDetailsHero } from './display/VehicleDetailsHero.jsx'

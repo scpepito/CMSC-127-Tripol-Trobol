@@ -15,6 +15,7 @@ import {
 	AppFrame,
 	Button,
 	Combobox,
+	ConfirmModal,
 	DataTable,
 	PageHeader,
 	SearchInput,
@@ -44,6 +45,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 	const [loading, setLoading] = useState(false)
 	const [saving, setSaving] = useState(false)
 	const [error, setError] = useState('')
+	const [pendingDeleteRegistrationNumber, setPendingDeleteRegistrationNumber] = useState(null)
 
 	const [registrations, setRegistrations] = useState([])
 	const [selectedRegistration, setSelectedRegistration] = useState(null)
@@ -121,6 +123,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 		} catch (e) {
 			setError(e.message)
 		} finally {
+			setPendingDeleteRegistrationNumber(null)
 			setSaving(false)
 		}
 	}
@@ -220,7 +223,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 					</button>
 					<button
 						type="button"
-						onClick={() => handleDelete(row.registrationNumber)}
+						onClick={() => setPendingDeleteRegistrationNumber(row.registrationNumber)}
 						disabled={saving}
 						className="grid size-9 place-items-center rounded-xl bg-white cursor-pointer disabled:cursor-not-allowed"
 						aria-label="Delete"
@@ -522,6 +525,15 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 
 				{loading ? <div className="mt-4 text-sm text-slate-500">Loading...</div> : null}
 			</div>
+			<ConfirmModal
+				open={Boolean(pendingDeleteRegistrationNumber)}
+				title="Delete registration?"
+				description={`Registration ${pendingDeleteRegistrationNumber ?? ''} will be permanently removed.`}
+				confirmLabel="Delete Registration"
+				busy={saving}
+				onCancel={() => setPendingDeleteRegistrationNumber(null)}
+				onConfirm={() => handleDelete(pendingDeleteRegistrationNumber)}
+			/>
 		</AppFrame>
 	)
 }

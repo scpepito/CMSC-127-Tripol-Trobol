@@ -18,6 +18,7 @@ import {
   AppFrame,
   Button,
   Combobox,
+  ConfirmModal,
   DataTable,
   DriverDetailsHero,
   IconButton,
@@ -75,6 +76,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [pendingDeleteLicenseNumber, setPendingDeleteLicenseNumber] = useState(null)
 
   const [drivers, setDrivers] = useState([])
   const [selectedDriver, setSelectedDriver] = useState(null)
@@ -156,6 +158,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
     } catch (e) {
       setError(e.message)
     } finally {
+      setPendingDeleteLicenseNumber(null)
       setSaving(false)
     }
   }
@@ -241,7 +244,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
           <IconButton label="Edit" onClick={() => openEdit(row.licenseNumber)}>
             <Pencil className="size-4 text-[#8981d2]" />
           </IconButton>
-          <IconButton label="Delete" onClick={() => handleDelete(row.licenseNumber)} disabled={saving}>
+          <IconButton label="Delete" onClick={() => setPendingDeleteLicenseNumber(row.licenseNumber)} disabled={saving}>
             <Trash2 className="size-4 text-red-500" />
           </IconButton>
         </div>
@@ -619,6 +622,15 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
 
         {loading ? <div className="mt-4 text-sm text-slate-500">Loading...</div> : null}
       </div>
+      <ConfirmModal
+        open={Boolean(pendingDeleteLicenseNumber)}
+        title="Delete driver?"
+        description={`Driver ${formatLicenseNumber(pendingDeleteLicenseNumber ?? '')} will be permanently removed.`}
+        confirmLabel="Delete Driver"
+        busy={saving}
+        onCancel={() => setPendingDeleteLicenseNumber(null)}
+        onConfirm={() => handleDelete(pendingDeleteLicenseNumber)}
+      />
     </AppFrame>
   )
 }
