@@ -165,7 +165,7 @@ function ReportTypeCard({ report, active, onClick }) {
       type="button"
       onClick={onClick}
       className={cn(
-        'min-h-36 w-full gap-4 rounded-[16px] border p-5 text-left shadow-sm transition',
+        'min-h-36 w-full gap-4 rounded-2xl border p-5 text-left shadow-sm transition',
         'hover:border-blue-400 hover:shadow-md',
         active ? 'border-blue-500 ring-2 ring-blue-100 bg-blue-50' : 'bg-white border-slate-200',
       )}
@@ -183,7 +183,7 @@ function ReportTypeCard({ report, active, onClick }) {
 
 function ReportPanel({ title, icon, action, children, className }) {
   return (
-    <section className={cn('overflow-hidden rounded-[16px] border border-blue-500 bg-white shadow-md', className)}>
+    <section className={cn('overflow-hidden rounded-2xl border border-blue-500 bg-white shadow-md', className)}>
       <div className="flex min-h-15 items-center justify-between gap-4 bg-blue-50 px-6 py-4">
         <div className="flex items-center gap-2 text-[18px] font-bold text-blue-500">
           {icon}
@@ -360,7 +360,7 @@ export default function ReportsPage({ onNavigate }) {
           subtitle="Generate comprehensive reports and analytics for LTO records."
         />
 
-        <div className="mt-6 rounded-[16px] border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex items-center gap-2 text-[18px] font-bold text-slate-900">
             <FileBarChart2 className="size-5 text-blue-500" />
             <span>Select Report Type</span>
@@ -409,7 +409,7 @@ export default function ReportsPage({ onNavigate }) {
             </ReportPanel>
           </div>
         ) : (
-          <div className="mt-6 rounded-[16px] border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+          <div className="mt-6 rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
             <div className="text-[18px] font-bold text-slate-900">No Report Selected</div>
             <div className="mt-2 text-sm text-slate-500">Please select a report type above to begin generating reports.</div>
           </div>

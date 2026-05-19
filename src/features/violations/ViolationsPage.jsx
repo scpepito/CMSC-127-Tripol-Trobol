@@ -177,14 +177,14 @@ useEffect(() => {
       width: 150,
       render: (row) => <span className="font-medium">{row.violationId}</span>,
     },
-    { key: 'driver', header: 'Driver', width: 220, render: (row) => <span className="text-slate-600">{row.driverName}</span> },
+    { key: 'driver', header: 'Driver', width: 180, render: (row) => <span className="text-slate-600">{row.driverName}</span> },
     { key: 'violationType', header: 'Violation', width: 220, render: (row) => <span className="text-slate-600">{row.violationType}</span> },
-    { key: 'date', header: 'Date', width: 220, render: (row) => <span className="text-slate-600">{row.date}</span> },
-    { key: 'violationFine', header: 'Fine Amount', width: 220, render: (row) => <span className="text-slate-600">{row.violationFine}</span> },
+    { key: 'date', header: 'Date', width: 140, render: (row) => <span className="text-slate-600">{row.date}</span> },
+    { key: 'violationFine', header: 'Fine Amount', width: 150, render: (row) => <span className="text-slate-600">{row.violationFine}</span> },
     {
       key: 'status',
       header: 'Status',
-      width: 160,
+      width: 120,
       render: (row) => (
         <StatusPill tone={row.statusTone}>{row.statusLabel}</StatusPill>
       ),
