@@ -37,23 +37,22 @@ export default function RegistrationDetailsHero({
   footer = 'Land Transportation Office',
   className,
 }) {
-    // TODO: UPDATE ALL COLORS
   return (
     <section
       className={cn(
-        'relative overflow-hidden rounded-2xl bg-linear-to-bl from-[#E6757D] to-[#E86668] px-10 py-9 text-white',
-        'shadow-[0px_25px_50px_0px_rgba(0,0,0,0.25)] ring-1 ring-[#E86668] border-3 border-[#E6757D]',
+        'relative overflow-hidden rounded-2xl bg-linear-to-bl from-[#E3899C] to-[#D3798C] px-10 py-9 text-white',
+        'shadow-[0px_25px_50px_0px_rgba(0,0,0,0.25)] ring-1 ring-[#D3798C] border-3 border-[#E3899C]',
         'transition-all hover:shadow-xl hover:scale-[1.02]',
         className,
       )}
     >
       <div className="absolute right-10 top-9 grid size-16 place-items-center rounded-full bg-white shadow-[0px_10px_15px_0px_rgba(0,0,0,0.2),0px_4px_6px_0px_rgba(0,0,0,0.12)]">
-        <FileCheck className="size-7 text-[#E6757D]" />
+        <FileCheck className="size-7 text-[#e85f76]" />
       </div>
 
       {/*Row containing registration date details*/}
       <div className="grid grid-cols-1 gap-10 pr-20 md:grid-cols-3">
-        <div className="space-y-8 mt-4">
+        <div className="space-y-2.5 mt-4">
           <Field label="Registration Number">
             <div className="text-3xl font-semibold tracking-tight">{registrationNumber}</div>
           </Field>
@@ -66,16 +65,16 @@ export default function RegistrationDetailsHero({
         </div>
       </div>
 
-      <div className="mt-10 h-px w-full bg-white/25" />
+      <div className="mt-5 h-px w-full bg-white/25" />
 
       {/*Row containing owner and vehicle details*/}
       <div className="grid grid-cols-1 gap-10 pr-20 md:grid-cols-3">
-        <div className="space-y-1 mt-8">
+        <div className="space-y-1 mt-5">
           <Field label="Registered Vehicle">{vehiclePlate}</Field>
           {vehicleSub ? <div className="mt-1 text-sm font-medium text-white/75">{vehicleSub}</div> : null}
         </div>
 
-        <div className="space-y-1 mt-8">
+        <div className="space-y-1 mt-5">
           <Field label="Registered Owner">{ownerName}</Field>
           <div className="mt-1 text-sm font-medium text-white/75">{ownerLicense}</div>
         </div>

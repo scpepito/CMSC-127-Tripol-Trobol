@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import {
 	ArrowLeft,
+	ClipboardList,
 	Eye,
 	Filter,
 	User,
@@ -9,7 +10,6 @@ import {
 	Plus,
 	Trash2,
 	CarFront,
-	FileText
 } from 'lucide-react'
 import {
 	AppFrame,
@@ -22,7 +22,7 @@ import {
 	RegistrationDetailsHero,
 	StatusPill
 } from '../../components/index.js'
-import { createRegistration, deleteRegistration, getRegistration, listRegistrations, updateRegistration  } from '../../api/registrations.js'
+import { createRegistration, deleteRegistration, getRegistration, listRegistrations, updateRegistration } from '../../api/registrations.js'
 import { formatLicenseNumber } from '../../lib/licenseNumber.js'
 import RegistrationForm from './RegistrationForm.jsx'
 import { listRowFromApi, toStatusTone } from './registrationMappers.js'
@@ -99,7 +99,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 
 	async function openEdit(regNumber) {
 		setError('')
-		setLoading(true)		
+		setLoading(true)
 		try {
 			const registration = await getRegistration(regNumber)
 			setSelectedRegistration(registration)
@@ -216,7 +216,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 						aria-label="Edit"
 						title="Edit"
 					>
-						<Pencil className="size-4 text-[#E6757D]" />
+						<Pencil className="size-4 text-[#CC415E]" />
 					</button>
 					<button
 						type="button"
@@ -235,44 +235,62 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 
 	const reg_columns = [
 		{
-			key: 'registration_number',
-			header: 'Registration Number',
-			render: (row) => <span className="font-medium">{row.registration_number}</span>,
+			key: 'number',
+			header: 'No.',
+			width: 72,
+			render: (_, index) => <span className="font-medium text-slate-500">{index + 1}</span>,
 		},
 		{
-			key: 'is_selected',
-			width: 400,
+			key: 'registration_number',
+			header: 'Registration Number',
 			render: (row) => (
-				row.registration_number == selectedRegistration.registration_number ? 
-				<span
-					className='inline-flex h-6.5 items-center justify-center rounded-full px-3 text-xs font-medium bg-[#FEF4F4] text-[#E6757D] ring-1 ring-slate-200'
-				>
-					Current
-				</span>
-				: 
-				<span></span>
+				<div className="flex items-center gap-3">
+					<span className="font-medium">{row.registration_number}</span>
+					{row.registration_number == selectedRegistration.registration_number ? (
+					<span
+							className="inline-flex h-6.5 items-center justify-center rounded-full bg-[#FEF4F4] px-3 text-xs font-medium text-[#CA6379] ring-1 ring-[#E3899C]/40"
+					>
+						Current
+					</span>
+					) : null}
+				</div>
 			),
 		},
 		{
 			key: 'registration_date',
 			header: 'Registration Date',
-			align: 'right',
 			width: 200,
 			render: (row) => <span className="text-slate-600">{row.registration_date}</span>,
 		},
 		{
 			key: 'expiration',
 			header: 'Expiration Date',
-			align: 'right',
 			width: 200,
 			render: (row) => <span className="text-slate-600">{row.expiration_date}</span>,
 		},
 		{
 			key: 'status',
-			header: '',
+			header: 'Status',
 			width: 140,
 			render: (row) => (
 				<StatusPill tone={toStatusTone(row.registration_status)}>{row.registration_status}</StatusPill>
+			),
+		},
+		{
+			key: 'actions',
+			header: 'Actions',
+			width: 120,
+			align: 'right',
+			render: (row) => (
+				<button
+					type="button"
+					onClick={() => openDetails(row.registration_number)}
+					className="ml-12 grid size-9 place-items-center rounded-xl bg-white text-slate-700 ring-1 ring-[#E3899C]/40 hover:bg-[#FEF4F4]"
+					aria-label={`View registration ${row.registration_number}`}
+					title={`View registration ${row.registration_number}`}
+				>
+					<ChevronRight className="size-5" />
+				</button>
 			),
 		},
 	]
@@ -291,7 +309,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 								aria-label="Back"
 								title="Back"
 							>
-								<ArrowLeft className="size-6 text-[#E6757D]" />
+								<ArrowLeft className="size-6 text-[#E3899C]" />
 							</button>
 						}
 						title={view === 'create' ? 'Register Vehicle' : 'Edit Vehicle Registration'}
@@ -345,7 +363,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 								aria-label="Back"
 								title="Back"
 							>
-								<ArrowLeft className="size-6 text-[#E6757D]" />
+								<ArrowLeft className="size-6 text-[#E3899C]" />
 							</button>
 						}
 						title="Registration Details"
@@ -369,7 +387,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 							ownerLicense={formatLicenseNumber(selectedRegistration.owner?.license_number ?? '')}
 						/>
 
-						<SectionCard title="Vehicle Information" accent="orange">
+						<SectionCard title="Vehicle Information" icon={<CarFront className="size-4" />} accent="orange">
 							<button
 								type="button"
 								disabled={!selectedRegistration.vehicle?.plate_number}
@@ -386,9 +404,6 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 								aria-label={selectedRegistration.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
 								title={selectedRegistration.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
 							>
-								<div className="grid size-12 place-items-center rounded-2xl bg-[#FEF4F4] text-[#E6757D] ring-1 ring-[#E86668]/40">
-									<CarFront className="size-5" />
-								</div>
 								<div className="min-w-0 flex-1">
 									<div className="truncate font-semibold">{selectedRegistration.vehicle?.plate_number}</div>
 									<div className="mt-0.5 text-sm text-slate-500">
@@ -399,7 +414,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 							</button>
 						</SectionCard>
 
-						<SectionCard title="Owner Information" accent="orange">
+						<SectionCard title="Owner Information" icon={<User className="size-4" />} accent="orange">
 							<button
 								type="button"
 								disabled={!selectedRegistration.owner?.license_number}
@@ -416,9 +431,6 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 								aria-label={selectedRegistration.owner?.license_number ? 'View owner details' : 'Owner not available'}
 								title={selectedRegistration.owner?.license_number ? 'View owner details' : 'Owner not available'}
 							>
-								<div className="grid size-12 place-items-center rounded-2xl bg-[#FEF4F4] text-[#E6757D] ring-1 ring-[#E86668]/40">
-									<User className="size-5" />
-								</div>
 								<div className="min-w-0 flex-1">
 									<div className="truncate font-semibold">{selectedRegistration.owner?.full_name}</div>
 									<div className="mt-0.5 text-sm text-slate-500">
@@ -429,13 +441,28 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 							</button>
 						</SectionCard>
 
-						{/* List of registrations */}
-						<SectionCard title={`Registration History (${selectedRegistration.registrations.length})`} accent='orange'>
-							<DataTable
-								theadClassName="bg-[#fef4f4]"
-								columns={reg_columns}
-								rows={selectedRegistration.registrations}
-							/>
+						<SectionCard
+							title="Registration History"
+							icon={<ClipboardList className="size-4" />}
+							action={
+								<span className="rounded-full bg-white px-3 py-1 text-xs font-bold text-[#CA6379] ring-1 ring-[#E3899C]/40">
+									{selectedRegistration.registrations?.length ?? 0} total
+								</span>
+							}
+							accent="orange"
+						>
+							{selectedRegistration.registrations?.length ? (
+								<DataTable
+									theadClassName="bg-white text-[#CA6379]"
+									columns={reg_columns}
+									rows={selectedRegistration.registrations}
+									getRowKey={(row) => row.registration_number}
+								/>
+							) : (
+								<div className="rounded-[14px] bg-[#FEF4F4] px-5 py-6 text-center text-sm font-medium text-slate-500 ring-1 ring-[#E3899C]/40">
+									No registration history.
+								</div>
+							)}
 						</SectionCard>
 					</div>
 				</div>
@@ -455,7 +482,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 						</Button>
 					}
 				/>
-				<div className="mt-6 rounded-2xl border border-[#E86668] bg-[#FEF4F4] p-6 shadow-sm">
+				<div className="mt-6 rounded-2xl border border-[#E3899C] bg-[#FEF4F4] p-6 shadow-sm">
 					<div className="flex flex-col gap-4 md:flex-row">
 						<div className="flex-1">
 							<SearchInput
