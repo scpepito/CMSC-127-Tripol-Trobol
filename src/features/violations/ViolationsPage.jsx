@@ -10,7 +10,7 @@ import {
   Trash2,
   ClipboardList,
   CarFront,
-  MessageCircleWarning
+  MessageCircleWarning,
 } from 'lucide-react'
 import {
   AppFrame,
@@ -56,22 +56,22 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
     setViolations(rows.map(listRowFromApi))
   }, [search, status])
 
-const openDetails = useCallback(async (violationId) => {
-  if (!violationId) return; // Guard against empty IDs
-  setError('')
-  setLoading(true)
-  try {
-    const violation = await getViolation(violationId)
-    setSelectedViolation(violation)
-    setSelectedViolationId(violationId)
-    setView('details')
-  } catch (e) {
-    console.error(e)
-    setError(e.message)
-  } finally {
-    setLoading(false)
-  }
-}, [])
+  const openDetails = useCallback(async (violationId) => {
+    if (!violationId) return; // Guard against empty IDs
+    setError('')
+    setLoading(true)
+    try {
+      const violation = await getViolation(violationId)
+      setSelectedViolation(violation)
+      setSelectedViolationId(violationId)
+      setView('details')
+    } catch (e) {
+      console.error(e)
+      setError(e.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -95,16 +95,16 @@ const openDetails = useCallback(async (violationId) => {
     }
   }, [search, status])
 
-useEffect(() => {
-  if (!openViolationId) return
+  useEffect(() => {
+    if (!openViolationId) return
 
-  async function handleAutoOpen() {
-    await openDetails(openViolationId)
-    onNavigate?.({ key: 'violations', openViolationId: null, returnTo: returnTo ?? null })
-  }
+    async function handleAutoOpen() {
+      await openDetails(openViolationId)
+      onNavigate?.({ key: 'violations', openViolationId: null, returnTo: returnTo ?? null })
+    }
 
-  handleAutoOpen()
-}, [openViolationId, openDetails, onNavigate, returnTo])
+    handleAutoOpen()
+  }, [openViolationId, openDetails, onNavigate, returnTo])
 
 
 
@@ -283,7 +283,7 @@ useEffect(() => {
         {selectedViolation.violation_status}
       </StatusPill>
     )
-    
+
 
     return (
       <AppFrame activeKey="violations" onNavigate={onNavigate}>
@@ -324,7 +324,7 @@ useEffect(() => {
               addressLine2={`${selectedViolation.location?.region}, ${selectedViolation.location?.province}`}
 
               driverName={selectedViolation.driver?.full_name ?? ''}
-              driverLicense={formatLicenseNumber(selectedViolation.driver?.license_number ?? '')}           
+              driverLicense={formatLicenseNumber(selectedViolation.driver?.license_number ?? '')}
               vehicleName={`${selectedViolation.vehicle?.make ?? ''} ${selectedViolation.vehicle?.model ?? ''}`.trim()}
               vehicleSub={`${selectedViolation.vehicle?.year ?? ''} • ${selectedViolation.vehicle?.plate_number ?? ''} • ${selectedViolation.vehicle?.type ?? ''}`}
             />
@@ -351,7 +351,7 @@ useEffect(() => {
               </SectionCard>
             )}
 
-                        <SectionCard title="Driver Information" accent="green">
+            <SectionCard title="Driver Information" icon={<User className="size-4" />} accent="green">
               <button
                 type="button"
                 disabled={!selectedViolation.driver?.license_number}
@@ -368,9 +368,6 @@ useEffect(() => {
                 aria-label={selectedViolation.driver?.license_number ? 'View driver details' : 'Driver not available'}
                 title={selectedViolation.driver?.license_number ? 'View driver details' : 'Driver not available'}
               >
-                <div className="grid size-12 place-items-center rounded-2xl bg-[#E4FBF0] text-[#26BA84] ring-1 ring-[#26BA84]/40">
-                  <User className="size-5" />
-                </div>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-semibold">{selectedViolation.driver?.full_name}</div>
                   <div className="mt-0.5 text-sm text-slate-500">
@@ -382,35 +379,32 @@ useEffect(() => {
             </SectionCard>
 
 
-						<SectionCard title="Vehicle Information" accent="green">
-							<button
-								type="button"
-								disabled={!selectedViolation.vehicle?.plate_number}
-								onClick={() => {
-									const licensePlate = selectedViolation.vehicle?.plate_number
-									if (!licensePlate) return
-									onNavigate?.({
-										key: 'vehicles',
-										plateNumber: licensePlate,
+            <SectionCard title="Vehicle Information" icon={<CarFront className="size-4" />} accent="green">
+              <button
+                type="button"
+                disabled={!selectedViolation.vehicle?.plate_number}
+                onClick={() => {
+                  const licensePlate = selectedViolation.vehicle?.plate_number
+                  if (!licensePlate) return
+                  onNavigate?.({
+                    key: 'vehicles',
+                    plateNumber: licensePlate,
                     returnTo: { key: 'violations', violationId: selectedViolation.violation_id },
-									})
-								}}
-								className="flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 enabled:cursor-pointer enabled:hover:bg-slate-50 disabled:opacity-60"
-								aria-label={selectedViolation.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
-								title={selectedViolation.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
-							>
-								<div className="grid size-12 place-items-center rounded-2xl bg-[#E4FBF0] text-[#26BA84] ring-1 ring-[#26BA84]/40">
-									<CarFront className="size-5" />
-								</div>
-								<div className="min-w-0 flex-1">
-									<div className="truncate font-semibold">{selectedViolation.vehicle?.plate_number}</div>
-									<div className="mt-0.5 text-sm text-slate-500">
-										{`${selectedViolation.vehicle?.make} ${selectedViolation.vehicle?.model} (${selectedViolation.vehicle?.year})`}
-									</div>
-								</div>
-								<ChevronRight className="size-5 shrink-0 text-slate-400" />
-							</button>
-						</SectionCard>
+                  })
+                }}
+                className="flex w-full items-center gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 enabled:cursor-pointer enabled:hover:bg-slate-50 disabled:opacity-60"
+                aria-label={selectedViolation.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
+                title={selectedViolation.vehicle?.plate_number ? 'View vehicle details' : 'Vehicle not available'}
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="truncate font-semibold">{selectedViolation.vehicle?.plate_number}</div>
+                  <div className="mt-0.5 text-sm text-slate-500">
+                    {`${selectedViolation.vehicle?.make} ${selectedViolation.vehicle?.model} (${selectedViolation.vehicle?.year})`}
+                  </div>
+                </div>
+                <ChevronRight className="size-5 shrink-0 text-slate-400" />
+              </button>
+            </SectionCard>
 
             <SectionCard title="Location Information" accent="green">
               <p>{selectedViolation.location?.street}, {selectedViolation.location?.city}</p>
