@@ -33,8 +33,8 @@ export default function ViolationDetailsHero({
   return (
     <section
       className={cn(
-        'relative overflow-hidden rounded-2xl bg-linear-to-bl from-[#3EC191] to-[#63CAA3] px-10 py-9 text-white',
-        'shadow-[0px_25px_50px_0px_rgba(0,0,0,0.25)] ring-1 ring-[#3EC191] border-3 border-[#3EC191]',
+        'relative overflow-hidden rounded-2xl bg-linear-to-bl from-[#53cfa1] to-[#31ae7e] px-10 py-9 text-white',
+        'shadow-[0px_25px_50px_0px_rgba(0,0,0,0.25)] ring-1 ring-[#31ae7e] border-3 border-[#53cfa1]',
         'transition-all hover:shadow-xl hover:scale-[1.02]',
         className,
       )}
@@ -42,58 +42,42 @@ export default function ViolationDetailsHero({
       <div className="absolute right-10 top-9 grid size-16 place-items-center rounded-full bg-white shadow-[0px_10px_15px_0px_rgba(0,0,0,0.2),0px_4px_6px_0px_rgba(0,0,0,0.12)]">
         <TriangleAlert className="size-7 text-[#3EC191]" />
       </div>
-
+      <Field label="Ticket Number">
+        <div className="text-3xl font-semibold tracking-tight">{violationId}</div>
+      </Field>
       <div className="grid grid-cols-1 gap-10 pr-20 md:grid-cols-2">
         <div className="space-y-8 mt-4">
-          <Field label="Ticket Number">
-            <div className="text-3xl font-semibold tracking-tight">{violationId}</div>
-          </Field>
-
-          <Field label="Violation">           
-             <div className="text-2xl font-semibold tracking-tight">{violationType}</div>
-          </Field>
-
-
+          <Field label="Violation">{violationType}</Field>
           <Field label="Violation Date">{date}</Field>
-          <Field label="Addresss">{addressLine1}<br/>{addressLine2}</Field>
-
+          <Field label="Addresss">{addressLine1}, {addressLine2}</Field>
         </div>
 
-        <div className="space-y-8 mt-4">
-          <Field label="Fine Amount">
-            <div className="text-3xl font-semibold tracking-tight">₱{violationFine}</div>
-          </Field>
-
+        <div className="space-y-8 ml-40 mt-4">
+          <Field label="Fine Amount">₱{violationFine}</Field>
           {apprehendingOfficer && (
             <Field label="Apprehending Officer">
-              <div className="text-2xl font-semibold tracking-tight">
+              <div className="font-semibold tracking-tight">
                 {apprehendingOfficer}
               </div>
             </Field>
           )}
-
           <Field label="Status">{violationStatus}</Field>
-
-
         </div>
-
       </div>
 
+      <div className="mt-5 h-px w-full bg-white/25" />
 
-
-      <div className="mt-10 h-px w-full bg-white/25" />
-      
       <div className="grid grid-cols-1 gap-10 pr-20 md:grid-cols-3">
-        <Field label="Driver" className="mt-6">
-          <div  className="space-y-1">
-              <div className="text-2xl font-semibold tracking-tight">{driverName}</div>
+        <Field label="Driver" className="mt-5">
+          <div className="space-y-1">
+            <div className="font-semibold tracking-tight">{driverName}</div>
             <div className="mt-1 text-sm font-medium text-white/75">{driverLicense}</div>
           </div>
         </Field>
 
-        <Field label="Vehicle" className="mt-6">
+        <Field label="Vehicle" className="mt-5">
           <div className='-space-y-1'>
-            <div className="text-2xl font-semibold tracking-tight">{vehicleName}</div>
+            <div className="font-semibold tracking-tight">{vehicleName}</div>
             {vehicleSub ? <div className="mt-1 text-sm font-medium text-white/75">{vehicleSub}</div> : null}
           </div>
         </Field>
