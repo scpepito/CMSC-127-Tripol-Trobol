@@ -59,6 +59,7 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [pendingDeletePlateNumber, setPendingDeletePlateNumber] = useState(null)
+  const [pendingEditValues, setPendingEditValues] = useState(null)
 
   const [vehicles, setVehicles] = useState([])
   const [selectedVehicle, setSelectedVehicle] = useState(null)
@@ -167,8 +168,14 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
     } catch (e) {
       setError(e.message)
     } finally {
+      setPendingEditValues(null)
       setSaving(false)
     }
+  }
+
+  function requestUpdate(values) {
+    setError('')
+    setPendingEditValues(values)
   }
 
   const columns = [
@@ -385,6 +392,7 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
                 onClick={() => {
                   setView('list')
                   setError('')
+                  setPendingEditValues(null)
                 }}
                 className="grid size-11 place-items-center rounded-[14px] bg-[#fbf3fd] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
@@ -407,13 +415,27 @@ export default function VehiclesPage({ onNavigate, openPlateNumber, returnTo }) 
             <VehicleForm
               key={view === 'edit' ? (selectedVehicle?.plate_number ?? 'edit') : 'create'}
               initialValues={view === 'edit' ? selectedVehicle : null}
-              onSubmit={view === 'edit' ? handleUpdate : handleCreate}
-              onCancel={() => setView('list')}
+              onSubmit={view === 'edit' ? requestUpdate : handleCreate}
+              onCancel={() => {
+                setView('list')
+                setPendingEditValues(null)
+              }}
               saving={saving}
               submitLabel={view === 'create' ? "Save Vehicle" : "Save changes"}
             />
           </div>
         </div>
+        <ConfirmModal
+          open={Boolean(pendingEditValues)}
+          title="Save vehicle changes?"
+          description={`Changes to vehicle ${selectedPlateNumber ?? ''} will be saved.`}
+          confirmLabel="Save Changes"
+          busyLabel="Saving..."
+          busy={saving}
+          tone="warning"
+          onCancel={() => setPendingEditValues(null)}
+          onConfirm={() => handleUpdate(pendingEditValues)}
+        />
       </AppFrame>
     )
   }

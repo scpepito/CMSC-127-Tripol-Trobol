@@ -19,6 +19,7 @@ export default function ConfirmModal({
   description,
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
+  busyLabel,
   busy = false,
   tone = 'danger',
   onConfirm,
@@ -65,7 +66,7 @@ export default function ConfirmModal({
             {cancelLabel}
           </Button>
           <Button className={t.confirm} onClick={onConfirm} disabled={busy}>
-            {busy ? 'Deleting...' : confirmLabel}
+            {busy ? (busyLabel ?? 'Working...') : confirmLabel}
           </Button>
         </div>
       </div>

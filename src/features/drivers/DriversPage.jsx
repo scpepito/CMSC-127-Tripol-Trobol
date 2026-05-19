@@ -77,6 +77,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [pendingDeleteLicenseNumber, setPendingDeleteLicenseNumber] = useState(null)
+  const [pendingEditValues, setPendingEditValues] = useState(null)
 
   const [drivers, setDrivers] = useState([])
   const [selectedDriver, setSelectedDriver] = useState(null)
@@ -191,8 +192,14 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
     } catch (e) {
       setError(e.message)
     } finally {
+      setPendingEditValues(null)
       setSaving(false)
     }
+  }
+
+  function requestUpdate(values) {
+    setError('')
+    setPendingEditValues(values)
   }
 
   const columns = [
@@ -284,6 +291,7 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
                 onClick={() => {
                   setView('list')
                   setError('')
+                  setPendingEditValues(null)
                 }}
                 className="grid size-12 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
@@ -305,11 +313,23 @@ export default function DriversPage({ onNavigate, openLicenseNumber, returnTo })
               onCancel={() => {
                 setView('list')
                 setError('')
+                setPendingEditValues(null)
               }}
-              onSubmit={isEdit ? handleUpdate : handleCreate}
+              onSubmit={isEdit ? requestUpdate : handleCreate}
             />
           </div>
         </div>
+        <ConfirmModal
+          open={Boolean(pendingEditValues)}
+          title="Save driver changes?"
+          description={`Changes to driver ${formatLicenseNumber(selectedLicenseNumber ?? '')} will be saved.`}
+          confirmLabel="Save Changes"
+          busyLabel="Saving..."
+          busy={saving}
+          tone="warning"
+          onCancel={() => setPendingEditValues(null)}
+          onConfirm={() => handleUpdate(pendingEditValues)}
+        />
       </AppFrame>
     )
   }

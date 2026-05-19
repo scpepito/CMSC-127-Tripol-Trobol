@@ -47,6 +47,7 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [pendingDeleteViolationId, setPendingDeleteViolationId] = useState(null)
+  const [pendingEditValues, setPendingEditValues] = useState(null)
 
   const [violations, setViolations] = useState([])
   const [selectedViolation, setSelectedViolation] = useState(null)
@@ -163,8 +164,14 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
     } catch (e) {
       setError(e.message)
     } finally {
+      setPendingEditValues(null)
       setSaving(false)
     }
+  }
+
+  function requestUpdate(values) {
+    setError('')
+    setPendingEditValues(values)
   }
 
   const columns = [
@@ -240,7 +247,10 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
             leading={
               <button
                 type="button"
-                onClick={() => setView('list')}
+                onClick={() => {
+                  setView('list')
+                  setPendingEditValues(null)
+                }}
                 className="grid size-11 place-items-center rounded-[14px] bg-[#F4FBF5] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
                 aria-label="Back"
                 title="Back"
@@ -262,13 +272,27 @@ export default function ViolationsPage({ onNavigate, openViolationId, returnTo }
             <ViolationForm
               key={view === 'edit' ? (selectedViolation?.violation_id ?? 'edit') : 'create'}
               initialValues={view === 'edit' ? selectedViolation : null}
-              onSubmit={view === 'edit' ? handleUpdate : handleCreate}
-              onCancel={() => setView('list')}
+              onSubmit={view === 'edit' ? requestUpdate : handleCreate}
+              onCancel={() => {
+                setView('list')
+                setPendingEditValues(null)
+              }}
               saving={saving}
-              submitLabel="Save Violation"
+              submitLabel={view === 'edit' ? 'Save Changes' : 'Save Violation'}
             />
           </div>
         </div>
+        <ConfirmModal
+          open={Boolean(pendingEditValues)}
+          title="Save violation changes?"
+          description={`Changes to violation ${selectedViolationId ?? ''} will be saved.`}
+          confirmLabel="Save Changes"
+          busyLabel="Saving..."
+          busy={saving}
+          tone="warning"
+          onCancel={() => setPendingEditValues(null)}
+          onConfirm={() => handleUpdate(pendingEditValues)}
+        />
       </AppFrame>
     )
   }

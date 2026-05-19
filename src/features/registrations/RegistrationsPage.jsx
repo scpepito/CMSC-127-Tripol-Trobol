@@ -46,6 +46,7 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 	const [saving, setSaving] = useState(false)
 	const [error, setError] = useState('')
 	const [pendingDeleteRegistrationNumber, setPendingDeleteRegistrationNumber] = useState(null)
+	const [pendingEditValues, setPendingEditValues] = useState(null)
 
 	const [registrations, setRegistrations] = useState([])
 	const [selectedRegistration, setSelectedRegistration] = useState(null)
@@ -154,8 +155,14 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 		} catch (e) {
 			setError(e.message)
 		} finally {
+			setPendingEditValues(null)
 			setSaving(false)
 		}
+	}
+
+	function requestUpdate(values) {
+		setError('')
+		setPendingEditValues(values)
 	}
 
 	const columns = [
@@ -307,7 +314,10 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 						leading={
 							<button
 								type="button"
-								onClick={() => setView('list')}
+								onClick={() => {
+									setView('list')
+									setPendingEditValues(null)
+								}}
 								className="grid size-11 place-items-center rounded-[14px] bg-[#FEF4F4] shadow-sm ring-1 ring-slate-200 hover:bg-slate-50"
 								aria-label="Back"
 								title="Back"
@@ -329,13 +339,27 @@ export default function RegistrationsPage({ onNavigate, openRegistrationNumber, 
 						<RegistrationForm
 							key={view === 'edit' ? (selectedRegistration?.registration_number ?? 'edit') : 'create'}
 							initialValues={view === 'edit' ? selectedRegistration : null}
-							onSubmit={view === 'edit' ? handleUpdate : handleCreate}
-							onCancel={() => setView('list')}
+							onSubmit={view === 'edit' ? requestUpdate : handleCreate}
+							onCancel={() => {
+								setView('list')
+								setPendingEditValues(null)
+							}}
 							saving={saving}
-							submitLabel="Register Vehicle"
+							submitLabel={view === 'edit' ? 'Save Changes' : 'Register Vehicle'}
 						/>
 					</div>
 				</div>
+				<ConfirmModal
+					open={Boolean(pendingEditValues)}
+					title="Save registration changes?"
+					description={`Changes to registration ${selectedRegistrationNumber ?? ''} will be saved.`}
+					confirmLabel="Save Changes"
+					busyLabel="Saving..."
+					busy={saving}
+					tone="warning"
+					onCancel={() => setPendingEditValues(null)}
+					onConfirm={() => handleUpdate(pendingEditValues)}
+				/>
 			</AppFrame>
 		)
 	}
